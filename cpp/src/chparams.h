@@ -146,7 +146,7 @@ class CHparamsVector
 					       const double L_kuhn ,
 					       const double N ){
                    const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * X * L_omega * L_omega );
+                   const double Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * T * L_omega * L_omega );
 
                    return Eps_2;
 					       }
@@ -157,7 +157,7 @@ class CHparamsVector
 					       const double L_omega ,
 					       const double N ){
                    const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * X * N * N );
+                   const double Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
 
                    return Sigma;
 					       }
