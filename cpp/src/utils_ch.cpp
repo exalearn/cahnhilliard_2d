@@ -80,7 +80,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 					 SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)]         = info.BC_dirichlet_ch;
@@ -90,7 +90,7 @@ std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 
   }
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     c[info.idx2d(i, 0)]         = info.BC_dirichlet_ch;
@@ -107,7 +107,7 @@ std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 std::vector<double>& apply_neumann_bc( std::vector<double>& c ,
 				       SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)]         = c[info.idx2d(4, i)];
@@ -117,7 +117,7 @@ std::vector<double>& apply_neumann_bc( std::vector<double>& c ,
 
   }
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     c[info.idx2d(i, 0)]         = c[info.idx2d(i, 4)];
@@ -136,7 +136,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( std::vector<doub
 
   c = apply_neumann_bc( c , info );
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
 
     c[info.idx2d(info.ny-2, i)] = info.BC_dirichlet_ch;
