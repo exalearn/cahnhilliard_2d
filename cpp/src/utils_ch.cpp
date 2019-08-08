@@ -65,8 +65,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 
   // evaluate linear term
   # pragma omp parallel for
-  for (int i = 0; i < info.ny; ++i){
-    for (int j = 0; j < info.nx; ++j){
+  for (int j = 0; j < info.nx; ++j){
+    for (int i = 0; i < info.ny; ++i){
         
       const double c_i        = c[info.idx2d(i, j)];
       dcdt[info.idx2d(i,j)]  += -chpV.sigma[info.idx2d(i,j)] * ( c_i - chpV.m[info.idx2d(i,j)] );

@@ -54,9 +54,8 @@ int main()
   std::cout << "Diffusion timescale dt_diff = " << dt_diff/dt_biharm << " dt_biharm" << std::endl;
   std::cout << "Linear timescale dt_lin = " << dt_lin/dt_biharm << " dt_biharm" << std::endl;
 
+  //set up timer
   timer run_solver("run_ch_solver");
-
-  std::cout << "I AM HERE NOW" << std::endl;
   
   // Run solver
   for (int i=0; i<n_tsteps; i++) {
