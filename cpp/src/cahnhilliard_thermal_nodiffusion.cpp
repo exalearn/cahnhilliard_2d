@@ -6,7 +6,6 @@
 #include <boost/numeric/odeint.hpp>
 #include "cahnhilliard_thermal_nodiffusion.h"
 #include "utils_ch.h"
-
   /*
   Cahn-Hilliard:
   
