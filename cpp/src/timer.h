@@ -1,6 +1,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#include <assert.h>
 #include <chrono>
 
 class timer {
@@ -8,7 +9,7 @@ public:
     timer(const std::string& namee) : name(namee), started(false) {}
     
     void start(){
-        assert(!started);
+        std::assert(!started);
         t1 = time::now();
         started = true;
     }
