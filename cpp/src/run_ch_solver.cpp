@@ -31,7 +31,9 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
 
   const double stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
   const double res0            = rhs.l2residual(x);
-
+  
+  std::cout << "HERE I AM MAN" << std::endl;
+  
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
     rhs.write_state(x,0,info.nx,info.ny,info.outdir);
