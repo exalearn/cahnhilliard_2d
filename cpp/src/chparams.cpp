@@ -130,14 +130,14 @@ CHparamsVector::CHparamsVector( int nx , int ny ) {
 
 };
 
-double CHparamsVector::compute_stability_limit(double dx , double dy) {
+inline double CHparamsVector::compute_stability_limit(double dx , double dy) {
   double dmin  = std::min( dx , dy );
   int idx_gmax = std::distance( eps_2.begin() , std::max_element( eps_2.begin() , eps_2.end() , abs_compare ) );
   double gmax  = eps_2[ idx_gmax ];
   return 0.5 * dmin * dmin * dmin * dmin / gmax;
 };
 
-double CHparamsVector::convert_temperature_to_flory_huggins( const double T ,
+inline double CHparamsVector::convert_temperature_to_flory_huggins( const double T ,
                                                              const double T_min ,
                                                              const double T_max ,
                                                              const double X_min ,
@@ -151,7 +151,7 @@ double CHparamsVector::convert_temperature_to_flory_huggins( const double T ,
 
 };
 
-double CHparamsVector::compute_eps2_from_polymer_params( const double X ,
+inline double CHparamsVector::compute_eps2_from_polymer_params( const double X ,
                                                          const double m ,
                                                          const double L_kuhn ,
                                                          const double N ) {
@@ -162,7 +162,7 @@ double CHparamsVector::compute_eps2_from_polymer_params( const double X ,
   return Eps_2;
 };
 
-double CHparamsVector::compute_sigma_from_polymer_params( const double X ,
+inline double CHparamsVector::compute_sigma_from_polymer_params( const double X ,
                                                           const double m ,
                                                           const double L_kuhn ,
                                                           const double L_omega ,
