@@ -1,3 +1,6 @@
+#ifndef __TIMER_H__
+#define __TIMER_H__
+
 #include <chrono>
 
 class timer {
@@ -32,3 +35,4 @@ private:
     std::string name;
     using time=std::chrono::high_resolution_clock;
 };
+#endif
