@@ -185,22 +185,3 @@ void CHparamsVector::compute_and_set_eps2_and_sigma_from_polymer_params( const d
 
 };
 
-inline int SimInfo::idx2d_impl(int i, int j) {
-  return j * ny + i;
-};
-
-// regular modulo operator gives negative values without this
-inline int SimInfo::mod(int a, int b) {
-  return (a % b + b) % b;
-};
-
-inline int SimInfo::idx2d(int i, int j)
-{
-  // modify the indices to map to a periodic mesh. need two levels for the 4th order operator.
-  // i coordinates:
-  i = mod(i, ny);
-  j = mod(j, nx);
-  
-  return idx2d_impl(i, j);
-};
-
