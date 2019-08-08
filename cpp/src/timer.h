@@ -12,12 +12,12 @@ public:
     
     void stop(){
         t2 = time::now();
-        accumulated += duration_cast< duration<double> >(t2 - t1);
+        accumulated += std::chrono::duration_cast< std::chrono::duration<double> >(t2 - t1);
         started = false;
     }
     
     void reset(){
-        accumulated = duration_cast< duration<double> >(0.);
+        accumulated = std::chrono::duration_cast< std::chrono::duration<double> >(0.);
         started = false;
     }
     
