@@ -6,6 +6,7 @@
 #include <random>
 #include "chparams.h"
 #include "right_hand_side.h"
+#include "timer.h"
 
 class CahnHilliard2DRHS : public RightHandSide {
 

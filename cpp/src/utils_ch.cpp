@@ -11,8 +11,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 
   // evaluate the second order term, 5 point central stencil
   # pragma omp parallel for
-  for (int i = 0; i < info.ny; ++i) {
-    for (int j = 0; j < info.nx; ++j) {
+  for (int j = 0; j < info.nx; ++j) {
+    for (int i = 0; i < info.ny; ++i) {
         
       const double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
       const double c_im1 = laplace_component( info.idx2d(i - 1, j)  , c , chpV.u , chpV.b );
@@ -29,8 +29,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 
   // evaluate the 4th order term, 9 point central stencil
   # pragma omp parallel for
-  for (int i = 0; i < info.ny; ++i) {
-    for (int j = 0; j < info.nx; ++j) {
+  for (int j = 0; j < info.nx; ++j) {
+    for (int i = 0; i < info.ny; ++i) {
       
       const double c_i   = c[info.idx2d(i, j)];
       const double c_im1 = c[info.idx2d(i - 1, j)];
@@ -250,7 +250,7 @@ void compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet(const std::vector<do
   
 }
 
-double laplace_component(int i ,
+inline double laplace_component(int i ,
                          const std::vector<double>& c ,
                          const std::vector<double>& u ,
                          const std::vector<double>& b ) {
@@ -267,8 +267,8 @@ CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
   double dsigma_dT    = ( chpV.sigma_max - chpV.sigma_min ) / ( chpV.T_max - chpV.T_min );
   
   # pragma omp parallel for
-  for (int i = 0; i < info.ny; ++i) {
-    for (int j = 0; j < info.nx; ++j) {
+  for (int j = 0; j < info.nx; ++j) {
+    for (int i = 0; i < info.ny; ++i) {
 
       const double dT         = T[info.idx2d(i, j)] - chpV.T_min;
       const double eps2_fit   = deps2_dT  * dT + chpV.eps2_min;
@@ -291,8 +291,8 @@ CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0
   CHparamsVector chpV = chpV0;
   
   # pragma omp parallel for
-  for (int i = 0; i < info.ny; ++i) {
-    for (int j = 0; j < info.nx; ++j) {
+  for (int j = 0; j < info.nx; ++j) {
+    for (int i = 0; i < info.ny; ++i) {
       
       const int idx_ij        = info.idx2d(i, j);
       const double X          = convert_temperature_to_flory_huggins( chpV , info , T[idx_ij] );

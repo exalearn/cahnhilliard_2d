@@ -35,11 +35,11 @@ class SimInfo
   double BC_dirichlet_ch;       // Used to specify BC value for dirichlet BC
   std::string outdir = "./";    // Filepath to the output directory
 
-  int idx2d(int i, int j);
+  inline int idx2d(int i, int j);
 
  private:
-  int idx2d_impl(int i, int j);
-  int mod(int a, int b);
+  inline int idx2d_impl(int i, int j);
+  inline int mod(int a, int b);
   
 };
 
