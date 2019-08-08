@@ -20,7 +20,7 @@
   */
 
 CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHparamsScalar& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , info_(info)
+  : noise_dist_(0.0,1.0) , info_(info), t_params("compute_eps2_and_sigma_from_polymer_params"), t_nonlocal("compute_ch_nonlocal")
   {    
     chpV_.eps_2    = std::vector<double>( info_.nx*info_.ny , chp.eps_2     );
     chpV_.b        = std::vector<double>( info_.nx*info_.ny , chp.b         );
@@ -44,10 +44,6 @@ CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHp
       ch_rhs_ = &compute_ch_nonlocal;
       std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, periodic BCs, thermal coefficient dependence, no thermal diffusion" << std::endl;
     }
-    
-    //init timers
-    t_nonlocal = timer("compute_ch_nonlocal");
-    t_params = timer("compute_eps2_and_sigma_from_polymer_params");
   }
 
 CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHparamsVector& chp , SimInfo& info)
@@ -128,7 +124,7 @@ void CahnHilliard2DRHS_thermal_nodiffusion::write_state(const std::vector<double
   }
 
   outC.close();
-};
+}
 
 void CahnHilliard2DRHS_thermal_nodiffusion::printTimers() const{
   t_nonlocal.print();

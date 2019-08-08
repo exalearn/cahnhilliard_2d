@@ -6,6 +6,7 @@
 
 class timer {
 public:
+  
     timer(const std::string& namee) : name(namee), started(false) {}
     
     void start(){
