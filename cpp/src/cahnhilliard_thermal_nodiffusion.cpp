@@ -80,7 +80,7 @@ void CahnHilliard2DRHS_thermal_nodiffusion::rhs(const std::vector<double> &c, st
     // evaluate deterministic nonlocal dynamics
     t_nonlocal.start();
     compute_ch_nonlocal(c, dcdt, t, chpV_, info_);
-    t_nonlocal.stop()
+    t_nonlocal.stop();
         
   }
 
