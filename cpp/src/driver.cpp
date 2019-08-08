@@ -56,6 +56,8 @@ int main()
 
   timer run_solver("run_ch_solver");
 
+  std::cout << "I AM HERE NOW" << std::endl;
+  
   // Run solver
   for (int i=0; i<n_tsteps; i++) {
     info.t0 = i * dt_check;
