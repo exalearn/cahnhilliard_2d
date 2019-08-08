@@ -9,7 +9,7 @@ public:
     timer(const std::string& namee) : name(namee), started(false) {}
     
     void start(){
-        std::assert(!started);
+        assert(!started);
         t1 = time::now();
         started = true;
     }
