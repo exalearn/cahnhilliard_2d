@@ -10,7 +10,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   // dc/dt = laplacian( u*c^3 - b*c ) - eps_2*biharm(c) - sigma*(c - m)
 
   // evaluate the second order term, 5 point central stencil
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
         
@@ -28,7 +28,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   }
 
   // evaluate the 4th order term, 9 point central stencil
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
@@ -64,7 +64,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   }
 
   // evaluate linear term
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int i = 0; i < info.ny; ++i){
     for (int j = 0; j < info.nx; ++j){
         
@@ -80,7 +80,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 					 SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)]         = info.BC_dirichlet_ch;
@@ -90,7 +90,7 @@ std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 
   }
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     c[info.idx2d(i, 0)]         = info.BC_dirichlet_ch;
@@ -107,7 +107,7 @@ std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
 std::vector<double>& apply_neumann_bc( std::vector<double>& c ,
 				       SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)]         = c[info.idx2d(4, i)];
@@ -117,7 +117,7 @@ std::vector<double>& apply_neumann_bc( std::vector<double>& c ,
 
   }
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     c[info.idx2d(i, 0)]         = c[info.idx2d(i, 4)];
@@ -136,7 +136,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( std::vector<doub
 
   c = apply_neumann_bc( c , info );
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
 
     c[info.idx2d(info.ny-2, i)] = info.BC_dirichlet_ch;
@@ -153,7 +153,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( std::vector<d
 
   c = apply_neumann_bc( c , info );
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)] = info.BC_dirichlet_ch;
@@ -168,7 +168,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( std::vector<d
 std::vector<double>& set_boundary_values_to_zero( std::vector<double> &dcdt ,
 						  SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     dcdt[info.idx2d(0, i)]         = 0;
@@ -178,7 +178,7 @@ std::vector<double>& set_boundary_values_to_zero( std::vector<double> &dcdt ,
 
   }
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     dcdt[info.idx2d(i, 0)]         = 0;
@@ -266,7 +266,7 @@ CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
   double deps2_dT     = ( chpV.eps2_max  - chpV.eps2_min )  / ( chpV.T_max - chpV.T_min );
   double dsigma_dT    = ( chpV.sigma_max - chpV.sigma_min ) / ( chpV.T_max - chpV.T_min );
   
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
 
@@ -290,7 +290,7 @@ CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0
 
   CHparamsVector chpV = chpV0;
   
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
