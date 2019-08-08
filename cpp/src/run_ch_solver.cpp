@@ -83,7 +83,7 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   const double stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
   const double res0            = rhs.l2residual(x);
 
-  std::cout << "HERE I AM MAN" << std::endl;
+  timer t_solver("run_solver");
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
@@ -91,7 +91,9 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+    t_solver.start();
     integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
+    t_solver.stop();
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -105,7 +107,8 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
   rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
   info.x = x;
-
+  
+  t_solver.print();
 };
 
 
