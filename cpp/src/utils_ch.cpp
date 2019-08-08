@@ -10,7 +10,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   // dc/dt = laplacian( u*c^3 - b*c ) - eps_2*biharm(c) - sigma*(c - m)
 
   // evaluate the second order term, 5 point central stencil
-  # pragma omp parallel for
+  # pragma omp parallel for collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
         
@@ -28,7 +28,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   }
 
   // evaluate the 4th order term, 9 point central stencil
-  # pragma omp parallel for
+  # pragma omp parallel for collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
@@ -64,7 +64,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   }
 
   // evaluate linear term
-  # pragma omp parallel for
+  # pragma omp parallel for collapse(2)
   for (int i = 0; i < info.ny; ++i){
     for (int j = 0; j < info.nx; ++j){
         
@@ -266,7 +266,7 @@ CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
   double deps2_dT     = ( chpV.eps2_max  - chpV.eps2_min )  / ( chpV.T_max - chpV.T_min );
   double dsigma_dT    = ( chpV.sigma_max - chpV.sigma_min ) / ( chpV.T_max - chpV.T_min );
   
-  # pragma omp parallel for
+  # pragma omp parallel for collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
 
@@ -290,7 +290,7 @@ CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0
 
   CHparamsVector chpV = chpV0;
   
-  # pragma omp parallel for
+  # pragma omp parallel for collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
