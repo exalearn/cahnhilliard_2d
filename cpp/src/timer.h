@@ -6,12 +6,12 @@ public:
     
     void start(){
         assert(!started);
-        t1 = high_resolution_clock::now();
+        t1 = time::now();
         started = true;
     }
     
     void stop(){
-        t2 = high_resolution_clock::now();
+        t2 = time::now();
         accumulated += duration_cast< duration<double> >(t2 - t1);
         started = false;
     }
@@ -27,8 +27,8 @@ public:
     
 private:
     bool started;
-    high_resolution_clock::time_point t1, t2;
-    duration<double> accumulated;
+    std::chrono::high_resolution_clock::time_point t1, t2;
+    std::chrono::duration<double> accumulated;
     std::string name;
     std::chrono::high_resolution_clock time;
 };
