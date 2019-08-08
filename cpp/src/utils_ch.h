@@ -52,14 +52,22 @@ std::vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( std::vector<doub
 std::vector<double>& freeze_corners( std::vector<double>& dcdt ,
 				     SimInfo& info );
 
-double laplace_component(int i ,
+inline double laplace_component(const int& i ,
                          const std::vector<double>& c ,
                          const std::vector<double>& u ,
-                         const std::vector<double>& b );
+                         const std::vector<double>& b ){
+                           return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+                         }
 
-CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0 ,
+inline CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0 ,
 						   SimInfo& info,
-						   std::vector<double>& T );
+						   std::vector<double>& T ){
+                 const double dX_dTinv   = ( chpV.X_max  - chpV.X_min ) / ( 1.0 / chpV.T_min - 1.0 / chpV.T_max );  
+                 const double dTinv      = 1.0 / T - 1.0 / chpV.T_max;
+                 const double X          = dX_dTinv * dTinv + chpV.X_min;
+
+                 return X;
+						   }
 
 double convert_temperature_to_flory_huggins( CHparamsVector& chpV ,
 					     SimInfo& info,

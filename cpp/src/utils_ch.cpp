@@ -250,13 +250,13 @@ void compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet(const std::vector<do
   
 }
 
-inline double laplace_component(int i ,
-                         const std::vector<double>& c ,
-                         const std::vector<double>& u ,
-                         const std::vector<double>& b ) {
-
-  return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
-}
+//double laplace_component(int i ,
+//                         const std::vector<double>& c ,
+//                         const std::vector<double>& u ,
+//                         const std::vector<double>& b ) {
+//
+//  return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+//}
 
 CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
                                                    SimInfo& info,
@@ -310,14 +310,14 @@ CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0
 
 }
 
-double convert_temperature_to_flory_huggins( CHparamsVector& chpV,
-                                             SimInfo& info,
-                                             const double T ) {
-
-  const double dX_dTinv   = ( chpV.X_max  - chpV.X_min ) / ( 1.0 / chpV.T_min - 1.0 / chpV.T_max );  
-  const double dTinv      = 1.0 / T - 1.0 / chpV.T_max;
-  const double X          = dX_dTinv * dTinv + chpV.X_min;
-
-  return X;
-
-}
+//double convert_temperature_to_flory_huggins( CHparamsVector& chpV,
+//                                             SimInfo& info,
+//                                             const double T ) {
+//
+//  const double dX_dTinv   = ( chpV.X_max  - chpV.X_min ) / ( 1.0 / chpV.T_min - 1.0 / chpV.T_max );  
+//  const double dTinv      = 1.0 / T - 1.0 / chpV.T_max;
+//  const double X          = dX_dTinv * dTinv + chpV.X_min;
+//
+//  return X;
+//
+//}
