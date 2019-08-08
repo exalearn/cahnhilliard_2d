@@ -30,5 +30,5 @@ private:
     std::chrono::high_resolution_clock::time_point t1, t2;
     std::chrono::duration<double> accumulated;
     std::string name;
-    std::chrono::high_resolution_clock time;
+    using time=std::chrono::high_resolution_clock;
 };
