@@ -17,7 +17,7 @@ public:
     }
     
     void reset(){
-        accumulated = std::chrono::duration_cast< std::chrono::duration<double> >(0.);
+        accumulated = std::chrono::duration<double>(0.);
         started = false;
     }
     
