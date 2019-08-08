@@ -109,6 +109,7 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   info.x = x;
   
   t_solver.print();
+  rhs.printTimers();
 };
 
 
