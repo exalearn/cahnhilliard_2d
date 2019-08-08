@@ -54,12 +54,17 @@ int main()
   std::cout << "Diffusion timescale dt_diff = " << dt_diff/dt_biharm << " dt_biharm" << std::endl;
   std::cout << "Linear timescale dt_lin = " << dt_lin/dt_biharm << " dt_biharm" << std::endl;
 
+  timer run_solver("run_ch_solver");
+
   // Run solver
   for (int i=0; i<n_tsteps; i++) {
     info.t0 = i * dt_check;
     info.tf = (i+1) * dt_check;
     std::cout << "t0 = " << info.t0/dt_biharm << " dt_biharm , tf = " << info.tf/dt_biharm << " dt_biharm" << std::endl;
+    run_solver.start();
     run_ch_solver(chparams , info);
+    run_solver.stop();
   }
+  run_solver.print();
     
 }
