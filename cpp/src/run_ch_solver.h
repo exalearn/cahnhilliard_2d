@@ -1,4 +1,5 @@
 #include "chparams.h"
+#include "timer.h"
 
 // *****************************************************************
 // run_ch_solver() is the user-interface for running the CH solver,
