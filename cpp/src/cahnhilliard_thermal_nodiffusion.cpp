@@ -47,7 +47,7 @@ CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHp
   }
 
 CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHparamsVector& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , chpV_(chp) , info_(info)
+  : noise_dist_(0.0,1.0) , chpV_(chp) , info_(info), t_params("compute_eps2_and_sigma_from_polymer_params"), t_nonlocal("compute_ch_nonlocal")
   {
 
     if ( info.bc.compare("dirichlet") == 0) {
