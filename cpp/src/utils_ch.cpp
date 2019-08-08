@@ -153,7 +153,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( std::vector<d
 
   c = apply_neumann_bc( c , info );
   
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     c[info.idx2d(0, i)] = info.BC_dirichlet_ch;
@@ -168,7 +168,7 @@ std::vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( std::vector<d
 std::vector<double>& set_boundary_values_to_zero( std::vector<double> &dcdt ,
 						  SimInfo& info ) {
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.nx; ++i) {
     
     dcdt[info.idx2d(0, i)]         = 0;
@@ -178,7 +178,7 @@ std::vector<double>& set_boundary_values_to_zero( std::vector<double> &dcdt ,
 
   }
 
-  # pragma omp parallel for
+  # pragma omp parallel for simd
   for (int i = 0; i < info.ny; ++i) {
 
     dcdt[info.idx2d(i, 0)]         = 0;
