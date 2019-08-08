@@ -52,7 +52,7 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
   std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
   rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
   info.x = x;
-
+  
 };
 
 
@@ -110,6 +110,7 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   
   t_solver.print();
   rhs.printTimers();
+  
 };
 
 
@@ -160,7 +161,7 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
   std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
   rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
   info.x = x;
-
+  
 };
 
 
