@@ -10,7 +10,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   // dc/dt = laplacian( u*c^3 - b*c ) - eps_2*biharm(c) - sigma*(c - m)
 
   // evaluate the second order term, 5 point central stencil
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
