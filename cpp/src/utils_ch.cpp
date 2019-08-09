@@ -10,7 +10,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   // dc/dt = laplacian( u*c^3 - b*c ) - eps_2*biharm(c) - sigma*(c - m)
 
   // evaluate the second order term, 5 point central stencil
-  # pragma omp parallel for simd collapse(2)
+  # pragma omp parallel for
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
@@ -53,7 +53,7 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       double dxxxx = dxn * dxn * (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
 
       // mixed term 2*u_xxyy
-      double dxxyy = dxn * dyn * 2. * (4.*c_i - 2.*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
+      double dxxyy = dxn * dyn * 2.0 * (4.0*c_i - 2.0*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
 
       dcdt[info.idx2d(i,j)] += -chpV.eps_2[info.idx2d(i,j)] * ( dxxxx + dyyyy + dxxyy );
 
