@@ -10,12 +10,12 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   // dc/dt = laplacian( u*c^3 - b*c ) - eps_2*biharm(c) - sigma*(c - m)
 
   // evaluate the second order term, 5 point central stencil
-  # pragma omp parallel for
+  const double dxn = 1.0 / (info.dx * info.dx);
+  const double dyn = 1.0 / (info.dx * info.dx);
+  
+  # pragma omp parallel for firstprivate(dxn, dyn)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
-      
-      double dxn = 1.0 / (info.dx * info.dx);
-      double dyn = 1.0 / (info.dx * info.dx);
       
       // evaluate the second order term, 5 point central stencil
       double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
