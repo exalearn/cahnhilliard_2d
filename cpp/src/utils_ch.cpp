@@ -14,6 +14,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
+      double dxn = 1.0 / (info.dx * info.dx);
+      double dyn = 1.0 / (info.dx * info.dx);
       
       // evaluate the second order term, 5 point central stencil
       double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
@@ -22,8 +24,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       double c_jm1 = laplace_component( info.idx2d(i, j - 1)  , c , chpV.u , chpV.b );
       double c_jp1 = laplace_component( info.idx2d(i, j + 1)  , c , chpV.u , chpV.b );
 
-      double dxx = (1.0 / (info.dx * info.dx)) * ( c_jp1 + c_jm1 - 2.0 * c_i );
-      double dyy = (1.0 / (info.dy * info.dy)) * ( c_ip1 + c_im1 - 2.0 * c_i );
+      double dxx = dxn * ( c_jp1 + c_jm1 - 2.0 * c_i );
+      double dyy = dyn * ( c_ip1 + c_im1 - 2.0 * c_i );
       dcdt[info.idx2d(i, j)] = dxx + dyy;
       
       
@@ -45,19 +47,16 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       double c_br  = c[info.idx2d(i+1 , j+1)];
 
       // y-direction u_yyyy
-      double dyyyy = 1.0 / (info.dy * info.dy * info.dy * info.dy) * 
-        (c_ip2 - 4.0*c_ip1 + 6.0*c_i - 4.0*c_im1 + c_im2);
+      double dyyyy = dyn * dyn * (c_ip2 - 4.0*c_ip1 + 6.0*c_i - 4.0*c_im1 + c_im2);
 
       // x-direction u_xxxx
-      double dxxxx = 1.0 / (info.dx * info.dx * info.dx * info.dx) * 
-        (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
+      double dxxxx = dxn * dxn * (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
 
       // mixed term 2*u_xxyy
-      double dxxyy = 1.0 / (info.dx * info.dx * info.dy * info.dy) * 
-        2 * (4*c_i - 2*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
+      double dxxyy = dxn * dyn * 2. * (4.*c_i - 2.*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
 
       dcdt[info.idx2d(i,j)] += -chpV.eps_2[info.idx2d(i,j)] * ( dxxxx + dyyyy + dxxyy );
-      
+            
       
       // evaluate linear term
       dcdt[info.idx2d(i,j)]  += -chpV.sigma[info.idx2d(i,j)] * ( c_i - chpV.m[info.idx2d(i,j)] );
