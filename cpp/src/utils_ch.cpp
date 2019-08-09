@@ -16,11 +16,11 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       
       
       // evaluate the second order term, 5 point central stencil
-      const double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
-      const double c_im1 = laplace_component( info.idx2d(i - 1, j)  , c , chpV.u , chpV.b );
-      const double c_ip1 = laplace_component( info.idx2d(i + 1, j)  , c , chpV.u , chpV.b );
-      const double c_jm1 = laplace_component( info.idx2d(i, j - 1)  , c , chpV.u , chpV.b );
-      const double c_jp1 = laplace_component( info.idx2d(i, j + 1)  , c , chpV.u , chpV.b );
+      double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
+      double c_im1 = laplace_component( info.idx2d(i - 1, j)  , c , chpV.u , chpV.b );
+      double c_ip1 = laplace_component( info.idx2d(i + 1, j)  , c , chpV.u , chpV.b );
+      double c_jm1 = laplace_component( info.idx2d(i, j - 1)  , c , chpV.u , chpV.b );
+      double c_jp1 = laplace_component( info.idx2d(i, j + 1)  , c , chpV.u , chpV.b );
 
       double dxx = (1.0 / (info.dx * info.dx)) * ( c_jp1 + c_jm1 - 2.0 * c_i );
       double dyy = (1.0 / (info.dy * info.dy)) * ( c_ip1 + c_im1 - 2.0 * c_i );
@@ -28,19 +28,21 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       
       
       // evaluate the 4th order term, 9 point central stencil
-      const double c_i   = c[info.idx2d(i, j)];
-      const double c_im1 = c[info.idx2d(i - 1, j)];
-      const double c_ip1 = c[info.idx2d(i + 1, j)];
-      const double c_im2 = c[info.idx2d(i - 2, j)];
-      const double c_ip2 = c[info.idx2d(i + 2, j)];
-      const double c_jm1 = c[info.idx2d(i, j - 1)];
-      const double c_jp1 = c[info.idx2d(i, j + 1)];
-      const double c_jm2 = c[info.idx2d(i, j - 2)];
-      const double c_jp2 = c[info.idx2d(i, j + 2)];
-      const double c_ul  = c[info.idx2d(i-1 , j-1)];
-      const double c_ur  = c[info.idx2d(i-1 , j+1)];
-      const double c_bl  = c[info.idx2d(i+1 , j-1)];
-      const double c_br  = c[info.idx2d(i+1 , j+1)];
+      //nearest neighbor
+      c_i   = c[info.idx2d(i, j)];
+      c_im1 = c[info.idx2d(i - 1, j)];
+      c_ip1 = c[info.idx2d(i + 1, j)];
+      c_jm1 = c[info.idx2d(i, j - 1)];
+      c_jp1 = c[info.idx2d(i, j + 1)];
+      //next to nearest neighbor
+      double c_im2 = c[info.idx2d(i - 2, j)];
+      double c_ip2 = c[info.idx2d(i + 2, j)];
+      double c_jm2 = c[info.idx2d(i, j - 2)];
+      double c_jp2 = c[info.idx2d(i, j + 2)];
+      double c_ul  = c[info.idx2d(i-1 , j-1)];
+      double c_ur  = c[info.idx2d(i-1 , j+1)];
+      double c_bl  = c[info.idx2d(i+1 , j-1)];
+      double c_br  = c[info.idx2d(i+1 , j+1)];
 
       // y-direction u_yyyy
       double dyyyy = 1.0 / (info.dy * info.dy * info.dy * info.dy) * 
