@@ -13,7 +13,9 @@ void compute_ch_nonlocal(const std::vector<double> &c,
   # pragma omp parallel for
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
-        
+      
+      
+      // evaluate the second order term, 5 point central stencil
       const double c_i   = laplace_component( info.idx2d(i, j)      , c , chpV.u , chpV.b );
       const double c_im1 = laplace_component( info.idx2d(i - 1, j)  , c , chpV.u , chpV.b );
       const double c_ip1 = laplace_component( info.idx2d(i + 1, j)  , c , chpV.u , chpV.b );
@@ -24,14 +26,8 @@ void compute_ch_nonlocal(const std::vector<double> &c,
       double dyy = (1.0 / (info.dy * info.dy)) * ( c_ip1 + c_im1 - 2.0 * c_i );
       dcdt[info.idx2d(i, j)] = dxx + dyy;
       
-    }
-  }
-
-  // evaluate the 4th order term, 9 point central stencil
-  # pragma omp parallel for
-  for (int j = 0; j < info.nx; ++j) {
-    for (int i = 0; i < info.ny; ++i) {
       
+      // evaluate the 4th order term, 9 point central stencil
       const double c_i   = c[info.idx2d(i, j)];
       const double c_im1 = c[info.idx2d(i - 1, j)];
       const double c_ip1 = c[info.idx2d(i + 1, j)];
@@ -60,21 +56,58 @@ void compute_ch_nonlocal(const std::vector<double> &c,
 
       dcdt[info.idx2d(i,j)] += -chpV.eps_2[info.idx2d(i,j)] * ( dxxxx + dyyyy + dxxyy );
       
-    }
-  }
-
-  // evaluate linear term
-  # pragma omp parallel for
-  for (int j = 0; j < info.nx; ++j){
-    for (int i = 0; i < info.ny; ++i){
-        
-      const double c_i        = c[info.idx2d(i, j)];
+      
+      // evaluate linear term
       dcdt[info.idx2d(i,j)]  += -chpV.sigma[info.idx2d(i,j)] * ( c_i - chpV.m[info.idx2d(i,j)] );
-
     }
   }
 
+  //// evaluate the 4th order term, 9 point central stencil
+  //# pragma omp parallel for
+  //for (int j = 0; j < info.nx; ++j) {
+  //  for (int i = 0; i < info.ny; ++i) {
+  //    
+  //    const double c_i   = c[info.idx2d(i, j)];
+  //    const double c_im1 = c[info.idx2d(i - 1, j)];
+  //    const double c_ip1 = c[info.idx2d(i + 1, j)];
+  //    const double c_im2 = c[info.idx2d(i - 2, j)];
+  //    const double c_ip2 = c[info.idx2d(i + 2, j)];
+  //    const double c_jm1 = c[info.idx2d(i, j - 1)];
+  //    const double c_jp1 = c[info.idx2d(i, j + 1)];
+  //    const double c_jm2 = c[info.idx2d(i, j - 2)];
+  //    const double c_jp2 = c[info.idx2d(i, j + 2)];
+  //    const double c_ul  = c[info.idx2d(i-1 , j-1)];
+  //    const double c_ur  = c[info.idx2d(i-1 , j+1)];
+  //    const double c_bl  = c[info.idx2d(i+1 , j-1)];
+  //    const double c_br  = c[info.idx2d(i+1 , j+1)];
+  //
+  //    // y-direction u_yyyy
+  //    double dyyyy = 1.0 / (info.dy * info.dy * info.dy * info.dy) * 
+  //      (c_ip2 - 4.0*c_ip1 + 6.0*c_i - 4.0*c_im1 + c_im2);
+  //
+  //    // x-direction u_xxxx
+  //    double dxxxx = 1.0 / (info.dx * info.dx * info.dx * info.dx) * 
+  //      (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
+  //
+  //    // mixed term 2*u_xxyy
+  //    double dxxyy = 1.0 / (info.dx * info.dx * info.dy * info.dy) * 
+  //      2 * (4*c_i - 2*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
+  //
+  //    dcdt[info.idx2d(i,j)] += -chpV.eps_2[info.idx2d(i,j)] * ( dxxxx + dyyyy + dxxyy );
+  //    
+  //  }
+  //}
 
+  //// evaluate linear term
+  //# pragma omp parallel for
+  //for (int j = 0; j < info.nx; ++j){
+  //  for (int i = 0; i < info.ny; ++i){
+  //      
+  //    const double c_i        = c[info.idx2d(i, j)];
+  //    dcdt[info.idx2d(i,j)]  += -chpV.sigma[info.idx2d(i,j)] * ( c_i - chpV.m[info.idx2d(i,j)] );
+  //
+  //  }
+  //}
 }
 
 std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
