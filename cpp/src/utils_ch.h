@@ -1,6 +1,7 @@
 #ifndef __UTILS_CH_H__
 #define __UTILS_CH_H__
 
+#include <math.h>
 #include <vector>
 #include "chparams.h"
 
@@ -52,11 +53,17 @@ std::vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( std::vector<doub
 std::vector<double>& freeze_corners( std::vector<double>& dcdt ,
 				     SimInfo& info );
 
-inline double laplace_component(const int& i ,
-                         const std::vector<double>& c ,
-                         const std::vector<double>& u ,
-                         const std::vector<double>& b ){
-                           return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+//inline double laplace_component(const int& i ,
+//                         const std::vector<double>& c ,
+//                         const std::vector<double>& u ,
+//                         const std::vector<double>& b ){
+//                           return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+//                         }
+
+inline double laplace_component(const double& c,
+                         const double& u,
+                         const double& b ){
+                           return u * (c * c * c) - b * c;
                          }
 
 CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0 ,

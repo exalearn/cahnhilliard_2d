@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include "allocator.h"
 
 // ************************************************************
 // These classes form the main user-interface for the CH solver
