@@ -36,10 +36,16 @@ class SimInfo
   double BC_dirichlet_ch;       // Used to specify BC value for dirichlet BC
   std::string outdir = "./";    // Filepath to the output directory
 
+  //safe version (used for indices with offsets)
   inline int idx2d(int i, int j){
     i = (i + ny) % ny;
     j = (j + nx) % nx;
     
+    return j * ny + i;
+  }
+  
+  //unsafe version:
+  inline int idx2du(int i, int j){
     return j * ny + i;
   }
 
