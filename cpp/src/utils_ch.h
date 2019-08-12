@@ -66,11 +66,11 @@ inline double laplace_component(const double& c,
                            return u * (c * c * c) - b * c;
                          }
 
-CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0 ,
+void compute_chparams_using_temperature( CHparamsVector& chpV,
 						   SimInfo& info,
-						   std::vector<double>& T );
+						   const std::vector<double>& T );
 
-inline double convert_temperature_to_flory_huggins( CHparamsVector& chpV ,
+inline double convert_temperature_to_flory_huggins( CHparamsVector& chpV,
 					     SimInfo& info,
 					     const double T ){
                  const double dX_dTinv   = ( chpV.X_max  - chpV.X_min ) / ( 1.0 / chpV.T_min - 1.0 / chpV.T_max );  
@@ -80,9 +80,9 @@ inline double convert_temperature_to_flory_huggins( CHparamsVector& chpV ,
                  return X;
 					     }
 
-CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0 ,
-							   SimInfo& info,
-							   std::vector<double>& T );
+void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV ,
+							                                   SimInfo& info,
+							                                   const std::vector<double>& T );
 
 
 

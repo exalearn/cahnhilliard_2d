@@ -332,15 +332,14 @@ void compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet(const std::vector<do
 //  return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
 //}
 
-CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
-                                                   SimInfo& info,
-                                                   std::vector<double>& T ) {
+void compute_chparams_using_temperature( CHparamsVector& chpV,
+                                         SimInfo& info,
+                                         const std::vector<double>& T ) {
 
-  CHparamsVector chpV = chpV0;
   double deps2_dT     = ( chpV.eps2_max  - chpV.eps2_min )  / ( chpV.T_max - chpV.T_min );
   double dsigma_dT    = ( chpV.sigma_max - chpV.sigma_min ) / ( chpV.T_max - chpV.T_min );
   
-  double * __restrict__ T_data = T.data();
+  const double * __restrict__ T_data = T.data();
   double * __restrict__ eps_2_data = chpV.eps_2.data();
   double * __restrict__ sigma_data = chpV.sigma.data();
   
@@ -356,17 +355,12 @@ CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
 
     }
   }
-  
-  return chpV;
-
 }
 
 
-CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0,
-                                                           SimInfo& info,
-                                                           std::vector<double>& T ) {
-
-  CHparamsVector chpV = chpV0;
+void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV,
+                                                 SimInfo& info,
+                                                 const std::vector<double>& T ) {
   
   const double * __restrict__ T_data = T.data();
   double * __restrict__ eps_2_data = chpV.eps_2.data();
@@ -388,8 +382,6 @@ CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0
 
     }
   }
-  
-  return chpV;
 
 }
 

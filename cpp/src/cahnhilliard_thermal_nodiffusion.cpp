@@ -73,7 +73,7 @@ void CahnHilliard2DRHS_thermal_nodiffusion::rhs(const std::vector<double> &c, st
     // evaluate CH parameter dependencies on temperature
     //chpV_ = compute_chparams_using_temperature( chpV_ , info_ , chpV_.T_const );
     t_params.start();
-    chpV_ = compute_eps2_and_sigma_from_polymer_params( chpV_ , info_ , chpV_.T_const );
+    compute_eps2_and_sigma_from_polymer_params( chpV_ , info_ , chpV_.T_const );
     t_params.stop();
     
     // evaluate deterministic nonlocal dynamics
