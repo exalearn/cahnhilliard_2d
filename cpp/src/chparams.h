@@ -11,6 +11,9 @@
 // Use them to set all simulation options/parameters
 // ************************************************************
  
+//switch for doing double or single precision
+typedef double real;
+
 static bool abs_compare(int a, int b)
 {
   return (std::abs(a) < std::abs(b));
@@ -26,17 +29,17 @@ class SimInfo
   SimInfo() { };
   ~SimInfo() { };
   
-  double t0, tf;                // Initial and final simulation times
+  real t0, tf;                // Initial and final simulation times
   int iter = 0;                 // Current simulation iteration
-  double dx, dy;                // Spatial discretization
+  real dx, dy;                // Spatial discretization
   int nx, ny;                   // Number of grid points in (x,y)
-  std::vector<double> x;        // Optional, used to specify current state IFF t0 != 0 (MAKE THIS MORE ROBUST)
+  aligned_vector<real> x;        // Optional, used to specify current state IFF t0 != 0 (MAKE THIS MORE ROBUST)
   std::string bc = "periodic";  // Boundary condition type: "periodic", "neumann", "dirichlet", "mixed_neumann_bottom_dirichlet", "mixed_neumann_top_dirichlet"
   std::string rhs_type = "ch_non_thermal"; // RHS type: "ch_non_thermal", "ch_thermal_no_diffusion", "ch_thermal_with_diffusion"
-  double BC_dirichlet_ch;       // Used to specify BC value for dirichlet BC
+  real BC_dirichlet_ch;       // Used to specify BC value for dirichlet BC
   std::string outdir = "./";    // Filepath to the output directory
 
-  //safe version (used for indices with offsets)
+  //safe version (used for indices with offsets):
   inline int idx2d(int i, int j){
     i = (i + ny) % ny;
     j = (j + nx) % nx;
@@ -48,8 +51,12 @@ class SimInfo
   inline int idx2du(int i, int j){
     return j * ny + i;
   }
-
- //private:
+  
+  std::vector<real> getState() const{
+    std::vector<real> result(x.size());
+    for(int i=0; i<x.size(); i++) result[i] = x[i];
+    return result;
+  }
   
 };
 
@@ -64,65 +71,65 @@ class CHparamsScalar
   ~CHparamsScalar() { };
 
   // CH parameters: dc/dt = -eps_2 * \nabla^4( c ) + \nabla^2( u*c^3 - b*c ) - sigma*( c - m ) + sigma_noise*eta 
-  double eps_2;
-  double b;
-  double u;
-  double sigma;
-  double m;
-  double sigma_noise;
+  real eps_2;
+  real b;
+  real u;
+  real sigma;
+  real m;
+  real sigma_noise;
   // Thermal dynamics: dT/dt = DT * \nabla^2( T ) + f_T
-  double DT;
-  double f_T;
-  double eps2_min, eps2_max, sigma_min, sigma_max, T_min, T_max; // Limiters on eps_2, sigma, and T
-  double T_const; 
+  real DT;
+  real f_T;
+  real eps2_min, eps2_max, sigma_min, sigma_max, T_min, T_max; // Limiters on eps_2, sigma, and T
+  real T_const; 
   // Polymer parameters
-  double L_kuhn;            // Kuhn-statistical length
-  double N;                 // Total polymer chain length
-  double L_omega;           // Length of physical domain (in 2D, this is \sqrt( area ) )
-  double X_min, X_max;      // Min/max values of Flory-Huggins
+  real L_kuhn;            // Kuhn-statistical length
+  real N;                 // Total polymer chain length
+  real L_omega;           // Length of physical domain (in 2D, this is \sqrt( area ) )
+  real X_min, X_max;      // Min/max values of Flory-Huggins
 
-  inline double compute_stability_limit(double& dx , double& dy){
-    double dmin = std::min( dx , dy );
+  inline real compute_stability_limit(real& dx , real& dy){
+    real dmin = std::min( dx , dy );
     return 0.5 * dmin * dmin * dmin * dmin / eps_2;
   }
   
-  inline double convert_temperature_to_flory_huggins( 
-                 const double& T ,
-					       const double& T_min ,
-					       const double& T_max ,
-					       const double& X_min ,
-					       const double& X_max ){
-                   const double dX_dTinv   = ( X_max  - X_min ) / ( 1.0 / T_min - 1.0 / T_max );  
-                   const double dTinv      = 1.0 / T - 1.0 / T_max;
-                   const double X          = dX_dTinv * dTinv + X_min;
+  inline real convert_temperature_to_flory_huggins( 
+                 const real& T ,
+					       const real& T_min ,
+					       const real& T_max ,
+					       const real& X_min ,
+					       const real& X_max ){
+                   const real dX_dTinv   = ( X_max  - X_min ) / ( 1.0 / T_min - 1.0 / T_max );  
+                   const real dTinv      = 1.0 / T - 1.0 / T_max;
+                   const real X          = dX_dTinv * dTinv + X_min;
 
                    return X;
 					       }
                  
-  inline double compute_eps2_from_polymer_params(     
-                 const double& T ,
-					       const double& m ,
-					       const double& L_kuhn ,
-					       const double& N ){
-                   const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
+  inline real compute_eps2_from_polymer_params(     
+                 const real& T ,
+					       const real& m ,
+					       const real& L_kuhn ,
+					       const real& N ){
+                   const real m_scaled   = 0.5 * ( 1.0 - m );
+                   const real Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
 
                    return Eps_2;
 					       }
                  
-  inline double compute_sigma_from_polymer_params(    
-                 const double& T ,
-					       const double& m ,
-					       const double& L_kuhn ,
-					       const double& L_omega ,
-					       const double& N ){
-                   const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
+  inline real compute_sigma_from_polymer_params(    
+                 const real& T ,
+					       const real& m ,
+					       const real& L_kuhn ,
+					       const real& L_omega ,
+					       const real& N ){
+                   const real m_scaled   = 0.5 * ( 1.0 - m );
+                   const real Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
 
                    return Sigma;
 					       }
                  
-  void compute_and_set_eps2_and_sigma_from_polymer_params( const double& T );
+  void compute_and_set_eps2_and_sigma_from_polymer_params( const real& T );
 
 };
 
@@ -138,67 +145,135 @@ class CHparamsVector
   ~CHparamsVector() { };
 
   // CH parameters: dc/dt = -eps_2 * \nabla^4( c ) + \nabla^2( u*c^3 - b*c ) - sigma*( c - m ) + sigma_noise*eta
-  std::vector<double> eps_2;
-  std::vector<double> b;
-  std::vector<double> u;
-  std::vector<double> sigma;
-  std::vector<double> m;
-  double sigma_noise;
+  aligned_vector<real> eps_2;
+  aligned_vector<real> b;
+  aligned_vector<real> u;
+  aligned_vector<real> sigma;
+  aligned_vector<real> m;
+  real sigma_noise;
   // Thermal dynamics: dT/dt = DT * \nabla^2( T ) + f_T
-  std::vector<double> DT;
-  std::vector<double> f_T;
-  std::vector<double> T_const;
-  double eps2_min, eps2_max, sigma_min, sigma_max, T_min, T_max; // Limiters on eps_2, sigma, and T
+  aligned_vector<real> DT;
+  aligned_vector<real> f_T;
+  aligned_vector<real> T_const;
+  real eps2_min, eps2_max, sigma_min, sigma_max, T_min, T_max; // Limiters on eps_2, sigma, and T
   // Polymer parameters
-  double L_kuhn;        // Kuhn-statistical length
-  double N;             // Total polymer chain length
-  double L_omega;       // Length of physical domain (in 2D, this is \sqrt( area ) )
-  double X_min, X_max;  // Min/max values of Flory-Huggins
+  real L_kuhn;        // Kuhn-statistical length
+  real N;             // Total polymer chain length
+  real L_omega;       // Length of physical domain (in 2D, this is \sqrt( area ) )
+  real X_min, X_max;  // Min/max values of Flory-Huggins
 
-  inline double compute_stability_limit(double& dx , double& dy){
-    double dmin  = std::min( dx , dy );
+  inline real compute_stability_limit(real& dx , real& dy){
+    real dmin  = std::min( dx , dy );
     int idx_gmax = std::distance( eps_2.begin() , std::max_element( eps_2.begin() , eps_2.end() , abs_compare ) );
-    double gmax  = eps_2[ idx_gmax ];
+    real gmax  = eps_2[ idx_gmax ];
     return 0.5 * dmin * dmin * dmin * dmin / gmax;
   }
   
-  inline double convert_temperature_to_flory_huggins( 
-                 const double& T ,
-					       const double& T_min ,
-					       const double& T_max ,
-					       const double& X_min ,
-					       const double& X_max ){
-                   const double dX_dTinv   = ( X_max  - X_min ) / ( 1.0 / T_min - 1.0 / T_max );  
-                   const double dTinv      = 1.0 / T - 1.0 / T_max;
-                   const double X          = dX_dTinv * dTinv + X_min;
+  //accessor functions before we figure out how to expose aligned vectors directly
+  void set_T(const std::vector<real>& T_constt){
+    T_const.resize(T_constt.size());
+    #pragma omp parallel for
+    for(int i=0; i<T_constt.size(); i++) T_const[i] = T_constt[i];
+  }
+  
+  void set_b(const std::vector<real>& bb){
+    b.resize(bb.size());
+    #pragma omp parallel for
+    for(int i=0; i<bb.size(); i++) b[i] = bb[i];
+  }
+  
+  void set_u(const std::vector<real>& uu){
+    u.resize(uu.size());
+    #pragma omp parallel for
+    for(int i=0; i<uu.size(); i++) u[i] = uu[i];
+  }
+  
+  void set_m(const std::vector<real>& mm){
+    m.resize(mm.size());
+    #pragma omp parallel for
+    for(int i=0; i<mm.size(); i++) m[i] = mm[i];
+  }
+  
+  //another set
+  std::vector<real> get_T() const{
+    std::vector<real> result(T_const.size());
+    #pragma omp parallel for
+    for(int i=0; i<T_const.size(); i++) result[i] = T_const[i];
+    return result;
+  }
+  
+  std::vector<real> get_b() const{
+    std::vector<real> result(b.size());
+    #pragma omp parallel for
+    for(int i=0; i<b.size(); i++) result[i] = b[i];
+    return result;
+  }
+  
+  std::vector<real> get_u() const{
+    std::vector<real> result(u.size());
+    #pragma omp parallel for
+    for(int i=0; i<u.size(); i++) result[i] = u[i];
+    return result;
+  }
+  
+  std::vector<real> get_m() const{
+    std::vector<real> result(m.size());
+    #pragma omp parallel for
+    for(int i=0; i<m.size(); i++) result[i] = m[i];
+    return result;
+  }
+  
+  std::vector<real> get_eps_2() const{
+    std::vector<real> result(eps_2.size());
+    #pragma omp parallel for
+    for(int i=0; i<eps_2.size(); i++) result[i] = eps_2[i];
+    return result;
+  }
+  
+  std::vector<real> get_sigma() const{
+    std::vector<real> result(sigma.size());
+    #pragma omp parallel for
+    for(int i=0; i<sigma.size(); i++) result[i] = sigma[i];
+    return result;
+  }
+  
+  inline real convert_temperature_to_flory_huggins( 
+                 const real& T ,
+					       const real& T_min ,
+					       const real& T_max ,
+					       const real& X_min ,
+					       const real& X_max ){
+                   const real dX_dTinv   = ( X_max  - X_min ) / ( 1.0 / T_min - 1.0 / T_max );  
+                   const real dTinv      = 1.0 / T - 1.0 / T_max;
+                   const real X          = dX_dTinv * dTinv + X_min;
 
                    return X;
 	}
                  
-  inline double compute_eps2_from_polymer_params(     
-                 const double& T ,
-					       const double& m ,
-					       const double& L_kuhn ,
-					       const double& N ){
-                   const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * T * L_omega * L_omega );
+  inline real compute_eps2_from_polymer_params(     
+                 const real& T ,
+					       const real& m ,
+					       const real& L_kuhn ,
+					       const real& N ){
+                   const real m_scaled   = 0.5 * ( 1.0 - m );
+                   const real Eps_2      = L_kuhn * L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * T * L_omega * L_omega );
 
                    return Eps_2;
 					       }
                  
-  inline double compute_sigma_from_polymer_params(    
-                 const double& T ,
-					       const double& m ,
-					       const double& L_kuhn ,
-					       const double& L_omega ,
-					       const double& N ){
-                   const double m_scaled   = 0.5 * ( 1.0 - m );
-                   const double Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
+  inline real compute_sigma_from_polymer_params(    
+                 const real& T ,
+					       const real& m ,
+					       const real& L_kuhn ,
+					       const real& L_omega ,
+					       const real& N ){
+                   const real m_scaled   = 0.5 * ( 1.0 - m );
+                   const real Sigma      = 36.0 * L_omega * L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * L_kuhn * L_kuhn * T * N * N );
 
                    return Sigma;
 					       }
                  
-  void compute_and_set_eps2_and_sigma_from_polymer_params( const double T ,
+  void compute_and_set_eps2_and_sigma_from_polymer_params( const real T ,
 							   SimInfo& info );
   
   

@@ -162,6 +162,12 @@ public:
         // avoid signed/unsigned warnings independent of size_t definition
         return (static_cast<std::size_t>(0) - static_cast<std::size_t>(1)) / sizeof(_Tp);
     }
+
+    // returns the alignment in bytes: useful for python bindings
+    std::size_t get_alignment() const 
+    { 
+      return _Align_v / 8; 
+    }
     
     // The following must be the same for all allocators.
     template <typename U>
@@ -214,3 +220,6 @@ public:
         return allocate(n);
     }
 };
+
+template <typename T>
+using aligned_vector = std::vector< T, aligned_allocator<T, 64> >;

@@ -13,11 +13,12 @@
 
 
 #include <vector>
+#include "allocator.h"
 #include <iostream>
 #include <boost/random.hpp>
 #include <boost/array.hpp>
-
 #include <boost/numeric/odeint.hpp>
+#include "chparams.h"
 
 //[ stochastic_euler_class
  //template< size_t N >
@@ -32,9 +33,9 @@ public:
     static order_type order( void ) { return 1; }
 
     template< class System >
-    void do_step( System system , std::vector< double > &x , double t , double dt ) const
+    void do_step( System system , aligned_vector<real> &x , real t , real dt ) const
     {
-        std::vector<double> det(x.size()) , stoch(x.size()) ;
+        aligned_vector<real> det(x.size()) , stoch(x.size()) ;
         system.first( x , det , t );
         system.second( x , stoch );
         for( size_t i=0 ; i<x.size() ; ++i )
@@ -48,7 +49,7 @@ public:
 
 struct ornstein_det
 {
-  void operator()( const std::vector< double > &x , std::vector< double > &dxdt ) const
+  void operator()( const aligned_vector<real> &x , aligned_vector<real> &dxdt ) const
     {
         dxdt[0] = -x[0];
     }
@@ -59,9 +60,9 @@ struct ornstein_stoch
     boost::mt19937 &m_rng;
     boost::normal_distribution<> m_dist;
 
-  ornstein_stoch( boost::mt19937 &rng , double sigma_noise ) : m_rng( rng ) , m_dist( 0.0 , sigma_noise ) { }
+  ornstein_stoch( boost::mt19937 &rng , real sigma_noise ) : m_rng( rng ) , m_dist( 0.0 , sigma_noise ) { }
 
-  void operator()( const std::vector< double > &x , std::vector< double > &dxdt )
+  void operator()( const aligned_vector<real>& x , aligned_vector<real>& dxdt )
     {
       for (int i=0; i<dxdt.size(); i++) {
         dxdt[i] = m_dist( m_rng );
@@ -73,7 +74,7 @@ struct ornstein_stoch
 struct streaming_observer
 {
     template< class State >
-    void operator()( const State &x , double t ) const
+    void operator()( const State &x , real t ) const
     {
         std::cout << t << "\t" << x[0] << "\n";
     }
@@ -87,7 +88,7 @@ struct streaming_observer
 
 //     //[ ornstein_uhlenbeck_main
 //     boost::mt19937 rng;
-//     double dt = 0.1;
+//     real dt = 0.1;
 //     state_type x = {{ 1.0 }};
 //     integrate_const( stochastic_euler< N >() , make_pair( ornstein_det() , ornstein_stoch( rng , 1.0 ) ),
 //             x , 0.0 , 10.0 , dt , streaming_observer() );

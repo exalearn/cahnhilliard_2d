@@ -14,26 +14,25 @@ class CahnHilliard2DRHS_thermal : public RightHandSide {
   CahnHilliard2DRHS_thermal(CHparamsScalar& chp , SimInfo& info);
   CahnHilliard2DRHS_thermal(CHparamsVector& chp , SimInfo& info);
   ~CahnHilliard2DRHS_thermal();
-  void rhs(const std::vector<double> &c, std::vector<double> &dcdt, const double t) override;
-  void write_state( const std::vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir ) override;
-  void setInitialConditions(std::vector<double> &x);
+  void rhs(const aligned_vector<real> &c, aligned_vector<real> &dcdt, const real t) override;
+  void write_state( const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir ) override;
+  void setInitialConditions(aligned_vector<real> &x);
 
-  struct PetscContext {
-    PetscContext(CahnHilliard2DRHS_thermal &outer) : instance_(outer) {}
+  //  struct PetscContext {
+  //  PetscContext(CahnHilliard2DRHS_thermal &outer) : instance_(outer) {}
     
-    CahnHilliard2DRHS_thermal &instance_;
-  };
+  //  CahnHilliard2DRHS_thermal &instance_;
+  //};
 
 private:
 
   CHparamsVector chpV_;
   SimInfo& info_;
-  void (*ch_rhs_) (const std::vector<double>&, std::vector<double>&, double, CHparamsVector&, SimInfo&);
+  void (*ch_rhs_) (const aligned_vector<real>&, aligned_vector<real>&, real, CHparamsVector&, SimInfo&);
 
   std::default_random_engine generator_;
-  std::normal_distribution<double> noise_dist_;
+  std::normal_distribution<real> noise_dist_;
 
-  PetscContext petsc_context_;    
 };
 
 

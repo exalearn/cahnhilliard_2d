@@ -21,15 +21,15 @@
 CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHparamsScalar& chp , SimInfo& info)
   : noise_dist_(0.0,1.0) , info_(info), t_params("compute_eps2_and_sigma_from_polymer_params"), t_nonlocal("compute_ch_nonlocal")
   {    
-    chpV_.eps_2    = std::vector<double>( info_.nx*info_.ny , chp.eps_2     );
-    chpV_.b        = std::vector<double>( info_.nx*info_.ny , chp.b         );
-    chpV_.u        = std::vector<double>( info_.nx*info_.ny , chp.u         );
-    chpV_.sigma    = std::vector<double>( info_.nx*info_.ny , chp.sigma     );
-    chpV_.m        = std::vector<double>( info_.nx*info_.ny , chp.m  );
-    chpV_.DT       = std::vector<double>( info_.nx*info_.ny , chp.DT  );
-    chpV_.f_T      = std::vector<double>( info_.nx*info_.ny , chp.f_T  );
+    chpV_.eps_2    = aligned_vector<real>( info_.nx*info_.ny , chp.eps_2     );
+    chpV_.b        = aligned_vector<real>( info_.nx*info_.ny , chp.b         );
+    chpV_.u        = aligned_vector<real>( info_.nx*info_.ny , chp.u         );
+    chpV_.sigma    = aligned_vector<real>( info_.nx*info_.ny , chp.sigma     );
+    chpV_.m        = aligned_vector<real>( info_.nx*info_.ny , chp.m  );
+    chpV_.DT       = aligned_vector<real>( info_.nx*info_.ny , chp.DT  );
+    chpV_.f_T      = aligned_vector<real>( info_.nx*info_.ny , chp.f_T  );
     chpV_.sigma_noise    = chp.sigma_noise;
-    chpV_.T_const        = std::vector<double>( info_.nx*info_.ny , chp.T_const  );
+    chpV_.T_const        = aligned_vector<real>( info_.nx*info_.ny , chp.T_const  );
 
     if ( info.bc.compare("dirichlet") == 0) {
       ch_rhs_ = &compute_ch_nonlocal_stationary_boundaries;
@@ -66,8 +66,11 @@ CahnHilliard2DRHS_thermal_nodiffusion::CahnHilliard2DRHS_thermal_nodiffusion(CHp
 
 CahnHilliard2DRHS_thermal_nodiffusion::~CahnHilliard2DRHS_thermal_nodiffusion() { };
 
-void CahnHilliard2DRHS_thermal_nodiffusion::rhs(const std::vector<double> &c, std::vector<double> &dcdt, const double t)
+void CahnHilliard2DRHS_thermal_nodiffusion::rhs(const aligned_vector<real> &c, aligned_vector<real> &dcdt, const real t)
   {
+    
+    LIKWID_MARKER_START("CahnHilliard2DRHS_thermal_nodiffusion::rhs");
+    
     dcdt.resize(info_.nx*info_.ny);
     
     // evaluate CH parameter dependencies on temperature
@@ -80,20 +83,23 @@ void CahnHilliard2DRHS_thermal_nodiffusion::rhs(const std::vector<double> &c, st
     t_nonlocal.start();
     compute_ch_nonlocal(c, dcdt, t, chpV_, info_);
     t_nonlocal.stop();
-        
+    
+    LIKWID_MARKER_STOP("CahnHilliard2DRHS_thermal_nodiffusion::rhs");
   }
 
 
-void CahnHilliard2DRHS_thermal_nodiffusion::setInitialConditions(std::vector<double> &x)
+void CahnHilliard2DRHS_thermal_nodiffusion::setInitialConditions(aligned_vector<real> &x)
   {
+    LIKWID_MARKER_START("CahnHilliard2DRHS_thermal_nodiffusion::setInitialConditions");
+    
     x.resize(info_.nx * info_.ny);
 
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(-1.0,1.0);
+    std::uniform_real_distribution<real> distribution(-1.0,1.0);
 
     for (int i = 0; i < info_.ny; ++i) {
       for (int j = 0; j < info_.nx; ++j) {
-        x[info_.idx2d(i,j)]   = distribution(generator) * 0.005;
+        x[info_.idx2du(i,j)]   = distribution(generator) * 0.005;
       }
     }
 
@@ -104,11 +110,13 @@ void CahnHilliard2DRHS_thermal_nodiffusion::setInitialConditions(std::vector<dou
     else if ( info_.bc.compare("neumann") == 0 ) {
       x = apply_neumann_bc( x , info_ );
     }
+    
+    LIKWID_MARKER_STOP("CahnHilliard2DRHS_thermal_nodiffusion::setInitialConditions");
 
   }
 
 
-void CahnHilliard2DRHS_thermal_nodiffusion::write_state(const std::vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir)
+void CahnHilliard2DRHS_thermal_nodiffusion::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir)
 {
   if ( outdir.back() != '/' )
     outdir += '/';

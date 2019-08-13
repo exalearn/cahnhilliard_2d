@@ -7,6 +7,7 @@
  #include <random>
  #include <fstream>
  #include <omp.h>
+ #include "allocator.h"
  #include "chparams.h"
  #include "run_ch_solver.h"
  %}
@@ -15,8 +16,8 @@
  %include typemaps.i
  %include std_string.i
  namespace std {
-  %template(DoubleVector) vector<double>;
+  %template(DoubleVector) vector< double >;
+  %template(FloatVector) vector< float >;
  };
-
  %include "chparams.h"
  %include "run_ch_solver.h"
