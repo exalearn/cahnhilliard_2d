@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   info.bc               = "periodic";
   info.rhs_type         = "ch_non_thermal";
 
-  double eps_2          = pow( 0.01 ,2 );
+  real eps_2          = pow( 0.01 ,2 );
   chparams.eps_2        = eps_2;
   chparams.b            = eps_2 / info.dx / info.dx;
   chparams.u            = eps_2 / info.dx / info.dx;
@@ -60,17 +60,17 @@ int main(int argc, char* argv[])
   chparams.sigma_noise  = 0.0;
   
   int n_tsteps        = 25;
-  double n_dt         = 300.0;
+  real n_dt         = 300.0;
   // ******************************
 
   // Compute linear timescales
-  double dt_biharm  = (info.dx * info.dx * info.dx * info.dx) / chparams.eps_2;
-  double dt_diff    = info.dx * info.dx / chparams.u;
-  double dt_lin     = 1.0 / chparams.sigma;
+  real dt_biharm  = (info.dx * info.dx * info.dx * info.dx) / chparams.eps_2;
+  real dt_diff    = info.dx * info.dx / chparams.u;
+  real dt_lin     = 1.0 / chparams.sigma;
 
   // Setup temporal checkpointing
-  double tf         = n_dt * dt_biharm;
-  double dt_check   = tf / n_tsteps;
+  real tf         = n_dt * dt_biharm;
+  real dt_check   = tf / n_tsteps;
 
 
   std::cout << "Biharmonic timescale dt_biharm = " << dt_biharm << std::endl;
