@@ -15,25 +15,6 @@ void compute_ch_nonlocal(const aligned_vector<double>& c,
   
   LIKWID_MARKER_START("compute_ch_nonlocal");
   
-  ////cache blocking
-  //const int bsy = 128;
-  //const int bsx = 8;
-  //int nby = static_cast<int>(ceil(info.ny / bsy));
-  //int nbx = static_cast<int>(ceil(info.nx / bsx));
-  //
-  //#pragma omp parallel for collapse(2) firstprivate(dxn, dyn)
-  //for (int jb = 0; jb < info.nx; jb += bsx) {
-  //  for (int ib = 0; ib < info.ny; ib += bsy) {
-  //    
-  //    for (int jj = 0; jj < bsx; ++jj) {
-  //      for (int ii = 0; ii < bsy; ++ii) {
-  //    
-  //        //compute global indices
-  //        int j = jj + jb;
-  //        int i = ii + ib;
-  //        
-  //        if( (j < info.ny) && (i < info.nx) ){
-  
   const double * __restrict__ c_data = c.data();
   double * __restrict__  dcdt_data = dcdt.data();
   double* __restrict__ u_data = chpV.u.data();
@@ -42,58 +23,81 @@ void compute_ch_nonlocal(const aligned_vector<double>& c,
   double* __restrict__ sigma_data = chpV.sigma.data();
   double* __restrict__ m_data = chpV.m.data();
   
-  #pragma omp parallel for simd collapse(2) firstprivate(dxn, dyn)
-  for (int j = 0; j < info.nx; ++j) {
-    for (int i = 0; i < info.ny; ++i) {
-    
-      //get NN components
-      double c_i   = c_data[info.idx2du(i    , j    ) ];
-      double c_im1 = c_data[info.idx2d (i - 1, j    ) ];
-      double c_ip1 = c_data[info.idx2d (i + 1, j    ) ];
-      double c_jm1 = c_data[info.idx2d (i    , j - 1) ];
-      double c_jp1 = c_data[info.idx2d (i    , j + 1) ];
-    
-      // evaluate the second order term, 5 point central stencil
-      double l_i   = laplace_component( c_i   , u_data[info.idx2du(i    , j    )] , b_data[info.idx2du(i    , j    )] );
-      double l_im1 = laplace_component( c_im1 , u_data[info.idx2d (i - 1, j    )] , b_data[info.idx2d (i - 1, j    )] );
-      double l_ip1 = laplace_component( c_ip1 , u_data[info.idx2d (i + 1, j    )] , b_data[info.idx2d (i + 1, j    )] );
-      double l_jm1 = laplace_component( c_jm1 , u_data[info.idx2d (i    , j - 1)] , b_data[info.idx2d (i    , j - 1)] );
-      double l_jp1 = laplace_component( c_jp1 , u_data[info.idx2d (i    , j + 1)] , b_data[info.idx2d (i    , j + 1)] );
-    
-      //compute derivative
-      double dxx = dxn * ( l_jp1 + l_jm1 - 2.0 * l_i );
-      double dyy = dyn * ( l_ip1 + l_im1 - 2.0 * l_i );
-      double dcdt_temp = dxx + dyy;
-    
-    
-      // evaluate the 4th order term, 9 point central stencil
-      //next to nearest neighbor
-      double c_im2 = c_data[info.idx2d(i - 2, j)];
-      double c_ip2 = c_data[info.idx2d(i + 2, j)];
-      double c_jm2 = c_data[info.idx2d(i, j - 2)];
-      double c_jp2 = c_data[info.idx2d(i, j + 2)];
-      double c_ul  = c_data[info.idx2d(i-1 , j-1)];
-      double c_ur  = c_data[info.idx2d(i-1 , j+1)];
-      double c_bl  = c_data[info.idx2d(i+1 , j-1)];
-      double c_br  = c_data[info.idx2d(i+1 , j+1)];
-
-      // y-direction u_yyyy
-      double dyyyy = dyn * dyn * (c_ip2 - 4.0*c_ip1 + 6.0*c_i - 4.0*c_im1 + c_im2);
-
-      // x-direction u_xxxx
-      double dxxxx = dxn * dxn * (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
-
-      // mixed term 2*u_xxyy
-      double dxxyy = dxn * dyn * 2.0 * (4.0*c_i - 2.0*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
-
-      dcdt_temp += -eps_2_data[info.idx2du(i,j)] * ( dxxxx + dyyyy + dxxyy );
-
-    
-      // evaluate linear term
-      dcdt_temp  += -sigma_data[info.idx2du(i,j)] * ( c_i - m_data[info.idx2du(i,j)] );
+  //cache blocking
+  const int bsy = 64;
+  const int bsx = 8;
+  int nby = static_cast<int>(ceil(info.ny / bsy));
+  int nbx = static_cast<int>(ceil(info.nx / bsx));
+  
+#pragma omp parallel for collapse(3) firstprivate(dxn, dyn)
+  for (int jb = 0; jb < info.nx; jb += bsx) {
+    for (int ib = 0; ib < info.ny; ib += bsy) {
+      for (int jj = 0; jj < bsx; ++jj) {
+        
+#pragma omp simd
+        for (int ii = 0; ii < bsy; ++ii) {
       
-      //store result
-      dcdt_data[info.idx2du(i, j)] = dcdt_temp;
+          //compute global indices
+          int j = jj + jb;
+          int i = ii + ib;
+          
+          if( (j < info.ny) && (i < info.nx) ){
+  
+            //#pragma omp parallel for simd collapse(2) firstprivate(dxn, dyn)
+            //for (int j = 0; j < info.nx; ++j) {
+            //  for (int i = 0; i < info.ny; ++i) {
+    
+            //get NN components
+            double c_i   = c_data[info.idx2du(i    , j    ) ];
+            double c_im1 = c_data[info.idx2d (i - 1, j    ) ];
+            double c_ip1 = c_data[info.idx2d (i + 1, j    ) ];
+            double c_jm1 = c_data[info.idx2d (i    , j - 1) ];
+            double c_jp1 = c_data[info.idx2d (i    , j + 1) ];
+    
+            // evaluate the second order term, 5 point central stencil
+            double l_i   = laplace_component( c_i   , u_data[info.idx2du(i    , j    )] , b_data[info.idx2du(i    , j    )] );
+            double l_im1 = laplace_component( c_im1 , u_data[info.idx2d (i - 1, j    )] , b_data[info.idx2d (i - 1, j    )] );
+            double l_ip1 = laplace_component( c_ip1 , u_data[info.idx2d (i + 1, j    )] , b_data[info.idx2d (i + 1, j    )] );
+            double l_jm1 = laplace_component( c_jm1 , u_data[info.idx2d (i    , j - 1)] , b_data[info.idx2d (i    , j - 1)] );
+            double l_jp1 = laplace_component( c_jp1 , u_data[info.idx2d (i    , j + 1)] , b_data[info.idx2d (i    , j + 1)] );
+    
+            //compute derivative
+            double dxx = dxn * ( l_jp1 + l_jm1 - 2.0 * l_i );
+            double dyy = dyn * ( l_ip1 + l_im1 - 2.0 * l_i );
+            double dcdt_temp = dxx + dyy;
+    
+    
+            // evaluate the 4th order term, 9 point central stencil
+            //next to nearest neighbor
+            double c_im2 = c_data[info.idx2d(i - 2, j)];
+            double c_ip2 = c_data[info.idx2d(i + 2, j)];
+            double c_jm2 = c_data[info.idx2d(i, j - 2)];
+            double c_jp2 = c_data[info.idx2d(i, j + 2)];
+            double c_ul  = c_data[info.idx2d(i-1 , j-1)];
+            double c_ur  = c_data[info.idx2d(i-1 , j+1)];
+            double c_bl  = c_data[info.idx2d(i+1 , j-1)];
+            double c_br  = c_data[info.idx2d(i+1 , j+1)];
+
+            // y-direction u_yyyy
+            double dyyyy = dyn * dyn * (c_ip2 - 4.0*c_ip1 + 6.0*c_i - 4.0*c_im1 + c_im2);
+
+            // x-direction u_xxxx
+            double dxxxx = dxn * dxn * (c_jp2 - 4.0*c_jp1 + 6.0*c_i - 4.0*c_jm1 + c_jm2);
+
+            // mixed term 2*u_xxyy
+            double dxxyy = dxn * dyn * 2.0 * (4.0*c_i - 2.0*(c_im1 + c_ip1 + c_jm1 + c_jp1) + c_ul + c_ur + c_bl + c_br );
+
+            dcdt_temp += -eps_2_data[info.idx2du(i,j)] * ( dxxxx + dyyyy + dxxyy );
+
+    
+            // evaluate linear term
+            dcdt_temp  += -sigma_data[info.idx2du(i,j)] * ( c_i - m_data[info.idx2du(i,j)] );
+      
+            //store result
+            dcdt_data[info.idx2du(i, j)] = dcdt_temp;
+          }
+        }
+      }
     }
   }
   
