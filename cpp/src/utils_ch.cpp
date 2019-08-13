@@ -419,19 +419,42 @@ void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV,
   double * __restrict__ sigma_data = chpV.sigma.data();
   double * __restrict__ m_data = chpV.m.data();
   
-  #pragma omp parallel for simd collapse(2)
-  for (int j = 0; j < info.nx; ++j) {
-    for (int i = 0; i < info.ny; ++i) {
+//  #pragma omp parallel for simd collapse(2)
+//  for (int j = 0; j < info.nx; ++j) {
+//    for (int i = 0; i < info.ny; ++i) {
       
-      const int idx_ij        = info.idx2du(i, j);
-      const double X          = convert_temperature_to_flory_huggins( chpV , info , T_data[idx_ij] );
-      const double m_scaled   = 0.5 * ( 1.0 - m_data[idx_ij] );
-      const double eps_2      = chpV.L_kuhn * chpV.L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * X * chpV.L_omega * chpV.L_omega );
-      const double sigma      = 36.0 * chpV.L_omega * chpV.L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * chpV.L_kuhn * chpV.L_kuhn * X * chpV.N * chpV.N );
+  //cache blocking
+  const int bsy = 64;
+  const int bsx = 8;
+  int nby = static_cast<int>(ceil(info.ny / bsy));
+  int nbx = static_cast<int>(ceil(info.nx / bsx));
+  
+#pragma omp parallel for collapse(3)
+  for (int jb = 0; jb < info.nx; jb += bsx) {
+    for (int ib = 0; ib < info.ny; ib += bsy) {
+      for (int jj = 0; jj < bsx; ++jj) {
+        
+#pragma omp simd
+        for (int ii = 0; ii < bsy; ++ii) {
       
-      eps_2_data[idx_ij] = std::min( std::max( eps_2 , chpV.eps2_min )  , chpV.eps2_max );
-      sigma_data[idx_ij] = std::min( std::max( sigma , chpV.sigma_min ) , chpV.sigma_max );
+          //compute global indices
+          int j = jj + jb;
+          int i = ii + ib;
+          
+          if( (j < info.ny) && (i < info.nx) ){
+      
+            const int idx_ij        = info.idx2du(i, j);
+            const double X          = convert_temperature_to_flory_huggins( chpV , info , T_data[idx_ij] );
+            const double m_scaled   = 0.5 * ( 1.0 - m_data[idx_ij] );
+            const double eps_2      = chpV.L_kuhn * chpV.L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * X * chpV.L_omega * chpV.L_omega );
+            const double sigma      = 36.0 * chpV.L_omega * chpV.L_omega / ( m_scaled * m_scaled * (1.0 - m_scaled) * (1.0 - m_scaled) * chpV.L_kuhn * chpV.L_kuhn * X * chpV.N * chpV.N );
+      
+            eps_2_data[idx_ij] = std::min( std::max( eps_2 , chpV.eps2_min )  , chpV.eps2_max );
+            sigma_data[idx_ij] = std::min( std::max( sigma , chpV.sigma_min ) , chpV.sigma_max );
 
+          }
+        }
+      }
     }
   }
   
