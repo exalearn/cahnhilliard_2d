@@ -3,68 +3,76 @@
 
 #include <vector>
 #include "chparams.h"
+#include <math.h>
+#include "profile.h"
 
-void compute_ch_nonlocal(const std::vector<double> &c,
-			 std::vector<double> &dcdt,
+void compute_ch_nonlocal(const aligned_vector<double> &c,
+			 aligned_vector<double> &dcdt,
 			 const double t,
 			 CHparamsVector& chpV,
 			 SimInfo& info);
 
-void compute_ch_nonlocal_stationary_boundaries(const std::vector<double> &c,
-					       std::vector<double> &dcdt,
+void compute_ch_nonlocal_stationary_boundaries(const aligned_vector<double> &c,
+					       aligned_vector<double> &dcdt,
 					       const double t,
 					       CHparamsVector& chpV,
 					       SimInfo& info);
 
-void compute_ch_nonlocal_neumannBC(const std::vector<double> &c,
-				   std::vector<double> &dcdt,
+void compute_ch_nonlocal_neumannBC(const aligned_vector<double> &c,
+				   aligned_vector<double> &dcdt,
 				   const double t,
 				   CHparamsVector& chpV,
 				   SimInfo& info);
 
-void compute_ch_nonlocal_mixedBC_neumann_with_bottom_dirichlet(const std::vector<double> &c,
-							       std::vector<double> &dcdt,
+void compute_ch_nonlocal_mixedBC_neumann_with_bottom_dirichlet(const aligned_vector<double> &c,
+							       aligned_vector<double> &dcdt,
 							       const double t,
 							       CHparamsVector& chpV,
 							       SimInfo& info);
 
-void compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet(const std::vector<double> &c,
-							    std::vector<double> &dcdt,
+void compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet(const aligned_vector<double> &c,
+							    aligned_vector<double> &dcdt,
 							    const double t,
 							    CHparamsVector& chpV,
 							    SimInfo& info);
 
-std::vector<double>& set_boundary_values_to_zero( std::vector<double> &dcdt ,
+aligned_vector<double>& set_boundary_values_to_zero( aligned_vector<double> &dcdt ,
 						  SimInfo& info );
 
-std::vector<double>& apply_dirichlet_bc( std::vector<double>& c ,
+aligned_vector<double>& apply_dirichlet_bc( aligned_vector<double>& c ,
 					 SimInfo& info );
 
-std::vector<double>& apply_neumann_bc( std::vector<double>& c ,
+aligned_vector<double>& apply_neumann_bc( aligned_vector<double>& c ,
 				       SimInfo& info );
 
-std::vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( std::vector<double>& c ,
+aligned_vector<double>& apply_mixed_bc_neumann_with_bottom_dirichlet( aligned_vector<double>& c ,
 								   SimInfo& info );
 
-std::vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( std::vector<double>& c ,
+aligned_vector<double>& apply_mixed_bc_neumann_with_top_dirichlet( aligned_vector<double>& c ,
 								SimInfo& info );
 
-std::vector<double>& freeze_corners( std::vector<double>& dcdt ,
+aligned_vector<double>& freeze_corners( aligned_vector<double>& dcdt ,
 				     SimInfo& info );
 
-inline double laplace_component(const int& i ,
-                         const std::vector<double>& c ,
-                         const std::vector<double>& u ,
-                         const std::vector<double>& b ){
-                           return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+//inline double laplace_component(const int& i ,
+//                         const aligned_vector<double>& c ,
+//                         const aligned_vector<double>& u ,
+//                         const aligned_vector<double>& b ){
+//                           return u[i] * (c[i] * c[i] * c[i]) - b[i] * c[i];
+//                         }
+                         
+inline double laplace_component(const double& c,
+                         const double& u,
+                         const double& b ){
+                           return u * (c * c * c) - b * c;
                          }
 
 CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0 ,
 						   SimInfo& info,
-						   std::vector<double>& T );
+						   aligned_vector<double>& T );
 
-inline double convert_temperature_to_flory_huggins( CHparamsVector& chpV ,
-					     SimInfo& info,
+inline double convert_temperature_to_flory_huggins( const CHparamsVector& chpV ,
+					     const SimInfo& info,
 					     const double T ){
                  const double dX_dTinv   = ( chpV.X_max  - chpV.X_min ) / ( 1.0 / chpV.T_min - 1.0 / chpV.T_max );  
                  const double dTinv      = 1.0 / T - 1.0 / chpV.T_max;
@@ -73,10 +81,10 @@ inline double convert_temperature_to_flory_huggins( CHparamsVector& chpV ,
                  return X;
 					     }
 
-CHparamsVector compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV0 ,
+//inline version
+void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV ,
 							   SimInfo& info,
-							   std::vector<double>& T );
-
+							   const aligned_vector<double>& T );
 
 
 #endif

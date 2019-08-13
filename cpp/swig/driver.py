@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc
 import cahnhilliard as ch
+import time
 
 # ***************************************************************
 # Example driver program for 2D modified Cahn-Hilliard
@@ -64,8 +65,8 @@ diff_dt           = (info.dx**2) / np.max( [np.max(chparams.u) , np.max(chparams
 lin_dt            = 1.0 / np.max(chparams.sigma)
 
 # Setup checkpointing in time
-n_dt              = 2000
-n_tsteps          = 100
+n_dt              = 200 #2000
+n_tsteps          = 8 #100
 info.t0           = 0
 stiff_dt          = np.min([ biharm_dt , diff_dt , lin_dt ])
 t                 = np.linspace(info.t0 , info.t0 + n_dt * stiff_dt , n_tsteps+1)
@@ -82,10 +83,15 @@ print( 'Diffusion timescale dt_diff = ' , diff_dt , ' = ' , diff_dt/biharm_dt , 
 print( 'Linear timescale dt_lin = ' , lin_dt , ' = ' , lin_dt/biharm_dt , ' dt_biharm')
 print( 'Sampling interval = ' , dt_check / stiff_dt , ' dt_stiff' )
 
+
 # Run solver
+t0 = time.clock()
 for i in range(n_tsteps):
     info.t0          = t[i]
     info.tf          = t[i+1]
     chparams.T_const = ch.DoubleVector(T[i] * np.ones(nx**2))
     print( 't0 = ', t[i]/lin_dt, ' dt_lin , tf = ', t[i+1]/lin_dt, ' dt_lin')
     ch.run_ch_solver(chparams,info);
+
+runtime = time.clock() - t0
+print("Total time/per step [s]: {:.2f} {:.2f}".format(runtime,runtime/n_tsteps))

@@ -7,10 +7,10 @@
 #include "cahnhilliard_thermal.h"
 #include "utils_ch.h"
 
-#include <petscvec.h>
-#include <petscksp.h>
-#include <petscsnes.h>
-#include <petscts.h>
+//#include <petscvec.h>
+//#include <petscksp.h>
+//#include <petscsnes.h>
+//#include <petscts.h>
 
   /*
   Cahn-Hilliard:
@@ -25,15 +25,15 @@
   */
 
 CahnHilliard2DRHS_thermal::CahnHilliard2DRHS_thermal(CHparamsScalar& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , info_(info) , petsc_context_(*this)
+  : noise_dist_(0.0,1.0) , info_(info)
   {    
-    chpV_.eps_2    = std::vector<double>( info_.nx*info_.ny , chp.eps_2     );
-    chpV_.b        = std::vector<double>( info_.nx*info_.ny , chp.b         );
-    chpV_.u        = std::vector<double>( info_.nx*info_.ny , chp.u         );
-    chpV_.sigma    = std::vector<double>( info_.nx*info_.ny , chp.sigma     );
-    chpV_.m        = std::vector<double>( info_.nx*info_.ny , chp.m  );
-    chpV_.DT       = std::vector<double>( info_.nx*info_.ny , chp.DT  );
-    chpV_.f_T      = std::vector<double>( info_.nx*info_.ny , chp.f_T  );
+    chpV_.eps_2    = aligned_vector<double>( info_.nx*info_.ny , chp.eps_2     );
+    chpV_.b        = aligned_vector<double>( info_.nx*info_.ny , chp.b         );
+    chpV_.u        = aligned_vector<double>( info_.nx*info_.ny , chp.u         );
+    chpV_.sigma    = aligned_vector<double>( info_.nx*info_.ny , chp.sigma     );
+    chpV_.m        = aligned_vector<double>( info_.nx*info_.ny , chp.m  );
+    chpV_.DT       = aligned_vector<double>( info_.nx*info_.ny , chp.DT  );
+    chpV_.f_T      = aligned_vector<double>( info_.nx*info_.ny , chp.f_T  );
     chpV_.sigma_noise    = chp.sigma_noise;
 
     if ( info.bc.compare("dirichlet") == 0) {
@@ -52,7 +52,7 @@ CahnHilliard2DRHS_thermal::CahnHilliard2DRHS_thermal(CHparamsScalar& chp , SimIn
   }
 
 CahnHilliard2DRHS_thermal::CahnHilliard2DRHS_thermal(CHparamsVector& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , chpV_(chp) , info_(info) , petsc_context_(*this)
+  : noise_dist_(0.0,1.0) , chpV_(chp) , info_(info)
   {
 
     if ( info.bc.compare("dirichlet") == 0) {
@@ -72,28 +72,28 @@ CahnHilliard2DRHS_thermal::CahnHilliard2DRHS_thermal(CHparamsVector& chp , SimIn
 
 CahnHilliard2DRHS_thermal::~CahnHilliard2DRHS_thermal() { };
 
-void CahnHilliard2DRHS_thermal::rhs(const std::vector<double> &ct, std::vector<double> &dcTdt, const double t)
+void CahnHilliard2DRHS_thermal::rhs(const aligned_vector<double> &ct, aligned_vector<double> &dcTdt, const double t)
   {
     dcTdt.resize(2 * info_.nx * info_.ny);
-    std::vector<double> c = std::vector<double>( ct.begin() , ct.begin() + info_.nx*info_.ny );
-    std::vector<double> T = std::vector<double>( ct.begin() + info_.nx*info_.ny , ct.end() );
+    aligned_vector<double> c = aligned_vector<double>( ct.begin() , ct.begin() + info_.nx*info_.ny );
+    aligned_vector<double> T = aligned_vector<double>( ct.begin() + info_.nx*info_.ny , ct.end() );
 
     // enforce thermal BC: dT/dnormal = 0
     # pragma omp parallel for
     for (int i = 0; i < info_.nx; ++i) {
-      T[info_.idx2d(0,i)]          = T[info_.idx2d(1,i)];
-      T[info_.idx2d(info_.ny-1,i)] = T[info_.idx2d(info_.ny-2,i)];
+      T[info_.idx2du(0,i)]          = T[info_.idx2du(1,i)];
+      T[info_.idx2du(info_.ny-1,i)] = T[info_.idx2du(info_.ny-2,i)];
     }
 
     # pragma omp parallel for
     for (int i = 0; i < info_.ny; ++i) {
-      T[info_.idx2d(i,0)]          = T[info_.idx2d(i,1)];
-      T[info_.idx2d(i,info_.nx-1)] = T[info_.idx2d(i,info_.nx-2)];
+      T[info_.idx2du(i,0)]          = T[info_.idx2du(i,1)];
+      T[info_.idx2du(i,info_.nx-1)] = T[info_.idx2du(i,info_.nx-2)];
     }
 
     // evaluate CH parameter dependencies on temperature
     //chpV_ = compute_chparams_using_temperature( chpV_ , info_ , T );
-    chpV_ = compute_eps2_and_sigma_from_polymer_params( chpV_ , info_ , T );
+    compute_eps2_and_sigma_from_polymer_params( chpV_ , info_ , T );
 
     // evaluate deterministic nonlocal dynamics
     compute_ch_nonlocal(c, dcTdt, t, chpV_, info_);
@@ -103,16 +103,16 @@ void CahnHilliard2DRHS_thermal::rhs(const std::vector<double> &ct, std::vector<d
     for (int i = 0; i < info_.ny; ++i) {
       for (int j = 0; j < info_.nx; ++j) {
         
-        const double T_i   = T[info_.idx2d(i, j)];
-        const double T_im1 = T[info_.idx2d(i - 1, j)];
-        const double T_ip1 = T[info_.idx2d(i + 1, j)];
-        const double T_jm1 = T[info_.idx2d(i, j - 1)];
-        const double T_jp1 = T[info_.idx2d(i, j + 1)];
+        const double T_i   = T[info_.idx2du(i, j)];
+        const double T_im1 = T[info_.idx2d (i - 1, j)];
+        const double T_ip1 = T[info_.idx2d (i + 1, j)];
+        const double T_jm1 = T[info_.idx2d (i, j - 1)];
+        const double T_jp1 = T[info_.idx2d (i, j + 1)];
 
         double dxx = 1.0 / (info_.dx * info_.dx) * (T_jm1 + T_jp1 - 2.0 * T_i);
         double dyy = 1.0 / (info_.dy * info_.dy) * (T_im1 + T_ip1 - 2.0 * T_i);
         
-        dcTdt[info_.idx2d(i, j) + info_.nx*info_.ny]  = chpV_.DT[info_.idx2d(i, j)] * (dxx + dyy) + chpV_.f_T[info_.idx2d(i, j)];
+        dcTdt[info_.idx2du(i, j) + info_.nx*info_.ny]  = chpV_.DT[info_.idx2du(i, j)] * (dxx + dyy) + chpV_.f_T[info_.idx2du(i, j)];
         
       }
     }
@@ -120,20 +120,20 @@ void CahnHilliard2DRHS_thermal::rhs(const std::vector<double> &ct, std::vector<d
     // enforce thermal BC: dT/dnormal = 0
     # pragma omp parallel for
     for (int i = 0; i < info_.nx; ++i) {
-      dcTdt[info_.idx2d(0,i) + info_.nx*info_.ny]          = 0;
-      dcTdt[info_.idx2d(info_.ny-1,i) + info_.nx*info_.ny] = 0;
+      dcTdt[info_.idx2du(0,i) + info_.nx*info_.ny]          = 0;
+      dcTdt[info_.idx2du(info_.ny-1,i) + info_.nx*info_.ny] = 0;
     }
 
     # pragma omp parallel for
     for (int i = 0; i < info_.ny; ++i) {
-      dcTdt[info_.idx2d(i,0) + info_.nx*info_.ny]          = 0;
-      dcTdt[info_.idx2d(i,info_.nx-1) + info_.nx*info_.ny] = 0;
+      dcTdt[info_.idx2du(i,0) + info_.nx*info_.ny]          = 0;
+      dcTdt[info_.idx2du(i,info_.nx-1) + info_.nx*info_.ny] = 0;
     }
     
   }
 
 
-void CahnHilliard2DRHS_thermal::setInitialConditions(std::vector<double> &x)
+void CahnHilliard2DRHS_thermal::setInitialConditions(aligned_vector<double> &x)
   {
     x.resize(2 * info_.nx * info_.ny);
 
@@ -142,8 +142,8 @@ void CahnHilliard2DRHS_thermal::setInitialConditions(std::vector<double> &x)
 
     for (int i = 0; i < info_.ny; ++i) {
       for (int j = 0; j < info_.nx; ++j) {
-        x[info_.idx2d(i,j)]                     = distribution(generator) * 0.005;
-	x[info_.idx2d(i,j) + info_.nx*info_.ny] = chpV_.T_min;
+        x[info_.idx2du(i,j)]                     = distribution(generator) * 0.005;
+        x[info_.idx2du(i,j) + info_.nx*info_.ny] = chpV_.T_min;
       }
     }
 
@@ -158,7 +158,7 @@ void CahnHilliard2DRHS_thermal::setInitialConditions(std::vector<double> &x)
   }
 
 
-void CahnHilliard2DRHS_thermal::write_state(const std::vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir)
+void CahnHilliard2DRHS_thermal::write_state(const aligned_vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir)
 {
   if ( outdir.back() != '/' )
     outdir += '/';

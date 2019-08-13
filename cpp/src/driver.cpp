@@ -4,8 +4,9 @@
 #include <fstream>
 #include <omp.h>
 #include "run_ch_solver.h"
+#include "profile.h"
 
-int main()
+int main(int argc, char* argv[])
 {
 
   // ***************************************************************
@@ -16,6 +17,28 @@ int main()
   // Scalar coefficients
   // ***************************************************************
 
+  //int tlevel_provided;
+  //MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &tlevel_provided);
+  /*int ierr = MPI_Init(&argc, &argv);
+  if ( ierr != 0 )
+  {
+    std::cout << "\n";
+    std::cout << "ch2d - Fatal error!\n";
+    std::cout << "  MPI_Init returned ierr = " << ierr << "\n";
+    exit ( 1 );
+    }*/
+  //init markers
+  LIKWID_MARKER_INIT;
+  
+#pragma omp parallel
+  {
+    //init thread markers
+    LIKWID_MARKER_THREADINIT;
+  }
+  
+  
+  LIKWID_MARKER_START("ch2d");
+  
   CHparamsScalar chparams;
   SimInfo info;
   
@@ -67,5 +90,12 @@ int main()
     run_solver.stop();
   }
   run_solver.print();
-    
+
+  LIKWID_MARKER_STOP("ch2d");
+
+  //close likwid markers
+  LIKWID_MARKER_CLOSE;
+  //finalize MPI
+  //MPI_Finalize();
+  
 }

@@ -24,11 +24,11 @@
 CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsScalar& chp , SimInfo& info)
   : noise_dist_(0.0,1.0) , info_(info)
   {    
-    chpV_.eps_2    = std::vector<double>( info_.nx*info_.ny , chp.eps_2     );
-    chpV_.b        = std::vector<double>( info_.nx*info_.ny , chp.b         );
-    chpV_.u        = std::vector<double>( info_.nx*info_.ny , chp.u         );
-    chpV_.sigma    = std::vector<double>( info_.nx*info_.ny , chp.sigma     );
-    chpV_.m        = std::vector<double>( info_.nx*info_.ny , chp.m  );
+    chpV_.eps_2    = aligned_vector<double>( info_.nx*info_.ny , chp.eps_2     );
+    chpV_.b        = aligned_vector<double>( info_.nx*info_.ny , chp.b         );
+    chpV_.u        = aligned_vector<double>( info_.nx*info_.ny , chp.u         );
+    chpV_.sigma    = aligned_vector<double>( info_.nx*info_.ny , chp.sigma     );
+    chpV_.m        = aligned_vector<double>( info_.nx*info_.ny , chp.m  );
     chpV_.sigma_noise    = chp.sigma_noise;
 
     if ( info.bc.compare("dirichlet") == 0 ) {
@@ -81,15 +81,18 @@ CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsVector& chp , SimInfo& info)
 
 CahnHilliard2DRHS::~CahnHilliard2DRHS() { };
 
-void CahnHilliard2DRHS::rhs(const std::vector<double> &c, std::vector<double> &dcdt, const double t)
+void CahnHilliard2DRHS::rhs(const aligned_vector<double> &c, aligned_vector<double> &dcdt, const double t)
   {
+    LIKWID_MARKER_START("CahnHilliard2DRHS::rhs");
     dcdt.resize(info_.nx * info_.ny);
     (*ch_rhs_)(c, dcdt, t, chpV_, info_);
+    LIKWID_MARKER_STOP("CahnHilliard2DRHS::rhs");
   }
 
 
-void CahnHilliard2DRHS::setInitialConditions(std::vector<double> &x)
+void CahnHilliard2DRHS::setInitialConditions(aligned_vector<double> &x)
   {
+    LIKWID_MARKER_START("CahnHilliard2DRHS::setInitialConditions");
     x.resize(info_.nx * info_.ny);
 
     std::default_random_engine generator;
@@ -114,10 +117,10 @@ void CahnHilliard2DRHS::setInitialConditions(std::vector<double> &x)
     else if ( info_.bc.compare("neumann") == 0 ) {
       x = apply_neumann_bc( x , info_ );
     }
-    
+    LIKWID_MARKER_STOP("CahnHilliard2DRHS::setInitialConditions");
   }
 
-void CahnHilliard2DRHS::write_state(const std::vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir)
+void CahnHilliard2DRHS::write_state(const aligned_vector<double> &x , const int idx , const int nx , const int ny , std::string& outdir)
 {
   if ( outdir.back() != '/' )
     outdir += '/';

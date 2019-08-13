@@ -13,10 +13,10 @@
 
 
 #include <vector>
+#include "allocator.h"
 #include <iostream>
 #include <boost/random.hpp>
 #include <boost/array.hpp>
-
 #include <boost/numeric/odeint.hpp>
 
 //[ stochastic_euler_class
@@ -32,9 +32,9 @@ public:
     static order_type order( void ) { return 1; }
 
     template< class System >
-    void do_step( System system , std::vector< double > &x , double t , double dt ) const
+    void do_step( System system , aligned_vector<double> &x , double t , double dt ) const
     {
-        std::vector<double> det(x.size()) , stoch(x.size()) ;
+        aligned_vector<double> det(x.size()) , stoch(x.size()) ;
         system.first( x , det , t );
         system.second( x , stoch );
         for( size_t i=0 ; i<x.size() ; ++i )
@@ -48,7 +48,7 @@ public:
 
 struct ornstein_det
 {
-  void operator()( const std::vector< double > &x , std::vector< double > &dxdt ) const
+  void operator()( const aligned_vector<double> &x , aligned_vector<double> &dxdt ) const
     {
         dxdt[0] = -x[0];
     }
@@ -61,7 +61,7 @@ struct ornstein_stoch
 
   ornstein_stoch( boost::mt19937 &rng , double sigma_noise ) : m_rng( rng ) , m_dist( 0.0 , sigma_noise ) { }
 
-  void operator()( const std::vector< double > &x , std::vector< double > &dxdt )
+  void operator()( const aligned_vector<double>& x , aligned_vector<double>& dxdt )
     {
       for (int i=0; i<dxdt.size(); i++) {
         dxdt[i] = m_dist( m_rng );

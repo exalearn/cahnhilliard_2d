@@ -33,12 +33,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DBOOST_LOG_DYN_LINK -DNDEBUG")
 set( EXTERNAL_INSTALL_DIR ${CMAKE_BINARY_DIR}/external_install )
 add_subdirectory(external)
 
-message( STATUS "PETSC_INCLUDES ${PETSC_INCLUDES}")
-
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}
-                     ${PETSC_INCLUDES}
-                     ${CMAKE_BINARY_DIR}/external/petsc/include/petsc/mpiuni # needed for non-mpi petsc version
 )
 
 add_library( ch_src
@@ -52,17 +48,14 @@ add_library( ch_src
 	     src/right_hand_side.cpp  
   )
 
-add_dependencies(ch_src petsc_external)
 
 add_executable( ch2d
   src/driver.cpp
   )
 
-add_dependencies(ch2d petsc_external)
 
 target_link_libraries( ch2d
   ${Boost_LIBRARIES}   
-  ${PETSC_LIBRARIES}
   ch_src
 )
 
