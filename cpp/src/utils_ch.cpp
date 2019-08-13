@@ -42,7 +42,7 @@ void compute_ch_nonlocal(const aligned_vector<double>& c,
   double* __restrict__ sigma_data = chpV.sigma.data();
   double* __restrict__ m_data = chpV.m.data();
   
-  #pragma omp parallel for collapse(2) firstprivate(dxn, dyn)
+  #pragma omp parallel for simd collapse(2) firstprivate(dxn, dyn)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
     
@@ -67,12 +67,6 @@ void compute_ch_nonlocal(const aligned_vector<double>& c,
     
     
       // evaluate the 4th order term, 9 point central stencil
-      //nearest neighbor
-      //c_i   = c[info.idx2d(i, j)];
-      //c_im1 = c[info.idx2d(i - 1, j)];
-      //c_ip1 = c[info.idx2d(i + 1, j)];
-      //c_jm1 = c[info.idx2d(i, j - 1)];
-      //c_jp1 = c[info.idx2d(i, j + 1)];
       //next to nearest neighbor
       double c_im2 = c_data[info.idx2d(i - 2, j)];
       double c_ip2 = c_data[info.idx2d(i + 2, j)];
@@ -354,7 +348,7 @@ CHparamsVector compute_chparams_using_temperature( CHparamsVector& chpV0,
   double * __restrict__ eps_2_data = chpV.eps_2.data();
   double * __restrict__ sigma_data = chpV.sigma.data();
   
-  # pragma omp parallel for collapse(2)
+  # pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
 
@@ -421,7 +415,7 @@ void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV,
   double * __restrict__ sigma_data = chpV.sigma.data();
   double * __restrict__ m_data = chpV.m.data();
   
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for simd collapse(2)
   for (int j = 0; j < info.nx; ++j) {
     for (int i = 0; i < info.ny; ++i) {
       
