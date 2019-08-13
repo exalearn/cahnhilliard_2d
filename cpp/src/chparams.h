@@ -52,6 +52,12 @@ class SimInfo
     return j * ny + i;
   }
   
+  std::vector<real> getState() const{
+    std::vector<real> result(x.size());
+    for(int i=0; i<x.size(); i++) result[i] = x[i];
+    return result;
+  }
+  
  //private:
   
 };
@@ -163,6 +169,64 @@ class CHparamsVector
     int idx_gmax = std::distance( eps_2.begin() , std::max_element( eps_2.begin() , eps_2.end() , abs_compare ) );
     real gmax  = eps_2[ idx_gmax ];
     return 0.5 * dmin * dmin * dmin * dmin / gmax;
+  }
+  
+  //accessor functions before we figure out how to expose aligned vectors directly
+  void set_T(const std::vector<real>& T_constt){
+    T_const.resize(T_constt.size());
+    for(int i=0; i<T_constt.size(); i++) T_const[i] = T_constt[i];
+  }
+  
+  void set_b(const std::vector<real>& bb){
+    b.resize(bb.size());
+    for(int i=0; i<bb.size(); i++) b[i] = bb[i];
+  }
+  
+  void set_u(const std::vector<real>& uu){
+    u.resize(uu.size());
+    for(int i=0; i<uu.size(); i++) u[i] = uu[i];
+  }
+  
+  void set_m(const std::vector<real>& mm){
+    m.resize(mm.size());
+    for(int i=0; i<mm.size(); i++) m[i] = mm[i];
+  }
+  
+  //another set
+  std::vector<real> get_T() const{
+    std::vector<real> result(T_const.size());
+    for(int i=0; i<T_const.size(); i++) result[i] = T_const[i];
+    return result;
+  }
+  
+  std::vector<real> get_b() const{
+    std::vector<real> result(b.size());
+    for(int i=0; i<b.size(); i++) result[i] = b[i];
+    return result;
+  }
+  
+  std::vector<real> get_u() const{
+    std::vector<real> result(u.size());
+    for(int i=0; i<u.size(); i++) result[i] = u[i];
+    return result;
+  }
+  
+  std::vector<real> get_m() const{
+    std::vector<real> result(m.size());
+    for(int i=0; i<m.size(); i++) result[i] = m[i];
+    return result;
+  }
+  
+  std::vector<real> get_eps_2() const{
+    std::vector<real> result(eps_2.size());
+    for(int i=0; i<eps_2.size(); i++) result[i] = eps_2[i];
+    return result;
+  }
+  
+  std::vector<real> get_sigma() const{
+    std::vector<real> result(sigma.size());
+    for(int i=0; i<sigma.size(); i++) result[i] = sigma[i];
+    return result;
   }
   
   inline real convert_temperature_to_flory_huggins( 
