@@ -4,15 +4,14 @@ from scipy import misc
 import cahnhilliard as ch
 import time
 
+#import torch
+#torch.set_num_threads(1)
 
-import torch
-torch.set_num_threads(1)
-
-import os
-os.environ["OMP_NUM_THREADS"] = "8"
-os.environ["OMP_PLACES"] = "threads"
-os.environ["OMP_PROC_BIND"] = "spread"
-os.environ["OMP_NESTED"] = "True"
+#import os
+#os.environ["OMP_NUM_THREADS"] = "8"
+#os.environ["OMP_PLACES"] = "threads"
+#os.environ["OMP_PROC_BIND"] = "spread"
+#os.environ["OMP_NESTED"] = "True"
 
 # ***************************************************************
 # Example driver program for 2D modified Cahn-Hilliard
