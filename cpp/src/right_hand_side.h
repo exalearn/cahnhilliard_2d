@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include "allocator.h"
 #include "chparams.h"
 
 class RightHandSide {

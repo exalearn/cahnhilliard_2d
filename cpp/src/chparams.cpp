@@ -90,7 +90,7 @@ CHparamsScalar::CHparamsScalar( ) {
 
 };
 
-CHparamsVector::CHparamsVector( int nx , int ny ) {
+CHparamsVector::CHparamsVector( const int& nx , const int& ny ) {
   
   // CH parameter defaults
   eps_2.resize(   nx * ny );

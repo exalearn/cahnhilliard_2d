@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "allocator.h"
+#include "aligned_vector.h"
 
 // ************************************************************
 // These classes form the main user-interface for the CH solver
@@ -141,7 +141,7 @@ class CHparamsVector
  public:
 
   CHparamsVector() { };
-  CHparamsVector(int nx , int ny);
+  CHparamsVector(const int& nx , const int& ny);
   ~CHparamsVector() { };
 
   // CH parameters: dc/dt = -eps_2 * \nabla^4( c ) + \nabla^2( u*c^3 - b*c ) - sigma*( c - m ) + sigma_noise*eta

@@ -62,18 +62,18 @@ chparams.X_min        = Xmin
 chparams.X_max        = Xmax
 
 #set vector-values
-chparams.set_b(ch.DoubleVector(1.0 * np.ones(nx**2)))
-chparams.set_u(ch.DoubleVector(1.0 * np.ones(nx**2)))
-chparams.set_m(ch.DoubleVector(0.0 * np.ones(nx**2)))
-chparams.set_T(ch.DoubleVector(chparams.T_max * np.ones(nx**2)))
+chparams.b = 1.0 * np.ones(nx**2)
+chparams.u = 1.0 * np.ones(nx**2)
+chparams.m = 0.0 * np.ones(nx**2)
+chparams.T_const = chparams.T_max * np.ones(nx**2)
 chparams.compute_and_set_eps2_and_sigma_from_polymer_params( chparams.T_max , info )
 
 # ******************************
 
 # Define timescales
-biharm_dt         = (info.dx**4) / np.max(chparams.get_eps_2())
-diff_dt           = (info.dx**2) / np.max( [np.max(chparams.get_u()) , np.max(chparams.get_b())] )
-lin_dt            = 1.0 / np.max(chparams.get_sigma())
+biharm_dt         = (info.dx**4) / np.max(chparams.eps_2)
+diff_dt           = (info.dx**2) / np.max( [np.max(chparams.u) , np.max(chparams.b)] )
+lin_dt            = 1.0 / np.max(chparams.sigma)
 
 # Setup checkpointing in time
 n_dt              = 2000
@@ -96,15 +96,15 @@ print( 'Sampling interval = ' , dt_check / stiff_dt , ' dt_stiff' )
 
 
 # Run solver
-t0 = time.clock()
+t0 = time.time()
 for i in range(n_tsteps):
     info.t0          = t[i]
     info.tf          = t[i+1]
-    chparams.set_T(ch.DoubleVector(T[i] * np.ones(nx**2)))
+    chparams.T_const = T[i] * np.ones(nx**2)
     print( 't0 = ', t[i]/lin_dt, ' dt_lin , tf = ', t[i+1]/lin_dt, ' dt_lin')
-    ch.run_ch_solver(chparams,info);
+    ch.run_ch_solver(chparams, info);
     #print(np.array(info.getState()))
     #break
 
-runtime = time.clock() - t0
+runtime = time.time() - t0
 print("Total time/per step [s]: {:.2f} {:.2f}".format(runtime,runtime/n_tsteps))

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12)
 project(ch2d)
 
 include(ExternalProject)
@@ -31,7 +31,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DBOOST_LOG_DYN_LINK -DNDEBUG")
 #############################################
 
 set( EXTERNAL_INSTALL_DIR ${CMAKE_BINARY_DIR}/external_install )
-#add_subdirectory(external)
 
 include_directories( ${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}
@@ -59,38 +58,60 @@ target_link_libraries( ch2d
   ch_src
 )
 
-#############################################
-# Swig/Python build
-#############################################
 
-FIND_PACKAGE( SWIG REQUIRED )
-INCLUDE( ${SWIG_USE_FILE} )
+##############################################
+# PyBind11/Python build
+##############################################
+add_subdirectory(external/pybind11)
 
 FIND_PACKAGE( PythonLibs )
 INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_PATH} )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src )
-	    
-SET( CMAKE_SWIG_FLAGS "-threads" )
-SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fPIC")
 
-SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES CPLUSPLUS ON )
-SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES SWIG_FLAGS "-threads" )
+pybind11_add_module(aligned_vector src/python/aligned_vector/py_aligned_vector.cpp)
+set_target_properties(aligned_vector PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/ch2d/)
 
-#SWIG_ADD_LIBRARY( cahnhilliard TYPE SHARED LANGUAGE python SOURCES src/cahnhilliard.i )
-SWIG_ADD_MODULE( cahnhilliard python src/cahnhilliard.i src/chparams.cpp src/utils_ch.cpp )
+pybind11_add_module(cahnhilliard src/python/cahnhilliard/py_cahnhilliard.cpp)
+set_target_properties(cahnhilliard PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/ch2d/)
 
-SWIG_LINK_LIBRARIES( cahnhilliard
-                     ${PYTHON_LIBRARIES}
-		     ch_src
-)
-		   
-# Copy the shared objects and Swig wrappers to cpp/swig/
-add_custom_target( mvcmd_so ALL
-  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so" "${CMAKE_SOURCE_DIR}/swig/_cahnhilliard.so"
-  DEPENDS "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so"
-)
 add_custom_target( mvcmd_py ALL
-  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py" "${CMAKE_SOURCE_DIR}/swig/cahnhilliard.py"
-  DEPENDS "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/src/python/__init__.py" "${CMAKE_SOURCE_DIR}/python/ch2d/__init__.py"
+  DEPENDS "${CMAKE_SOURCE_DIR}/src/python/__init__.py"
 )
+
+##############################################
+## Swig/Python build
+##############################################
+#
+#FIND_PACKAGE( SWIG REQUIRED )
+#INCLUDE( ${SWIG_USE_FILE} )
+#
+#FIND_PACKAGE( PythonLibs )
+#INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_PATH} )
+#INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
+#INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src )
+#	    
+#SET( CMAKE_SWIG_FLAGS "-threads" )
+#SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fPIC")
+#
+#SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES CPLUSPLUS ON )
+#SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES SWIG_FLAGS "-threads" )
+#
+##SWIG_ADD_LIBRARY( cahnhilliard TYPE SHARED LANGUAGE python SOURCES src/cahnhilliard.i )
+#SWIG_ADD_MODULE( cahnhilliard python src/cahnhilliard.i src/chparams.cpp src/utils_ch.cpp )
+#
+#SWIG_LINK_LIBRARIES( cahnhilliard
+#                     ${PYTHON_LIBRARIES}
+#		     ch_src
+#)
+#		   
+## Copy the shared objects and Swig wrappers to cpp/swig/
+#add_custom_target( mvcmd_so ALL
+#  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so" "${CMAKE_SOURCE_DIR}/swig/_cahnhilliard.so"
+#  DEPENDS "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so"
+#)
+#add_custom_target( mvcmd_py ALL
+#  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py" "${CMAKE_SOURCE_DIR}/swig/cahnhilliard.py"
+#  DEPENDS "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py"
+#)

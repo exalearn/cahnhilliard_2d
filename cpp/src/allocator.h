@@ -220,6 +220,3 @@ public:
         return allocate(n);
     }
 };
-
-template <typename T>
-using aligned_vector = std::vector< T, aligned_allocator<T, 64> >;
