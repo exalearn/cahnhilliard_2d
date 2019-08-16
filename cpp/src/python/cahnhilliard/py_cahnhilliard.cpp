@@ -1,4 +1,5 @@
 #include <pybind11/stl_bind.h>
+#include <pybind11/iostream.h>
 #include "chparams.h"
 #include "run_ch_solver.h"
 
@@ -7,8 +8,22 @@ namespace py = pybind11;
 PYBIND11_MODULE(cahnhilliard, m) {
   
   //global functions
-  m.def("run_ch_solver", (void (*)(CHparamsVector&, SimInfo&)) &run_ch_solver, py::arg("chparamv"), py::arg("info"));
-  m.def("run_ch_solver", (void (*)(CHparamsScalar&, SimInfo&)) &run_ch_solver, py::arg("chparams"), py::arg("info"));
+  m.def("run_ch_solver", [](CHparamsVector& chparamv, SimInfo& info){
+    py::scoped_ostream_redirect stream(
+            std::cout,                               // std::ostream&
+            py::module::import("sys").attr("stdout") // Python output
+        );
+        run_ch_solver(chparamv, info);
+  }, py::arg("chparamv"), py::arg("info"));
+  
+  m.def("run_ch_solver", [](CHparamsScalar& chparams, SimInfo& info){
+    py::scoped_ostream_redirect stream(
+            std::cout,                               // std::ostream&
+            py::module::import("sys").attr("stdout") // Python output
+        );
+        run_ch_solver(chparams, info);
+  }, py::arg("chparams"), py::arg("info"));
+  //m.def("run_ch_solver", (void (*)(CHparamsScalar&, SimInfo&)) &run_ch_solver, py::arg("chparams"), py::arg("info"));
   
   //siminfo
   py::class_<SimInfo> sim_info(m, "SimInfo");
@@ -17,6 +32,12 @@ PYBIND11_MODULE(cahnhilliard, m) {
   sim_info.def(py::init<>());
   
   //do all the scalar stuff first
+  sim_info.def_property("nx", [](const SimInfo& si) { return si.nx; }, 
+                                [](SimInfo& si, const int& val) -> void { si.nx = val; });
+  
+  sim_info.def_property("ny", [](const SimInfo& si) { return si.ny; }, 
+                                [](SimInfo& si, const int& val) -> void { si.ny = val; });
+  
   sim_info.def_property("t0", [](const SimInfo& si) { return si.t0; }, 
                               [](SimInfo& si, const real& val) -> void { si.t0 = val; });
   
