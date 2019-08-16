@@ -20,7 +20,8 @@ class CahnHilliard2DRHS : public RightHandSide {
   void setInitialConditions(aligned_vector<real> &x) const;
   
  private:
-
+   
+   //debug
   CHparamsVector& chpV_;
   SimInfo& info_;
   void (*ch_rhs_) (const aligned_vector<real>&, aligned_vector<real>&, real, CHparamsVector&, SimInfo&);

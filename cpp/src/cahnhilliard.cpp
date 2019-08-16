@@ -54,6 +54,7 @@ CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsScalar& chp , SimInfo& info)
     
   }
 
+
 CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsVector& chp , SimInfo& info)
   : noise_dist_(0.0,1.0) , chpV_(chp) , info_(info)
   {
@@ -79,7 +80,9 @@ CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsVector& chp , SimInfo& info)
     }
   }
 
+
 CahnHilliard2DRHS::~CahnHilliard2DRHS() { };
+
 
 void CahnHilliard2DRHS::rhs(const aligned_vector<real> &c, aligned_vector<real> &dcdt, const real t)
   {
@@ -116,6 +119,7 @@ void CahnHilliard2DRHS::setInitialConditions(aligned_vector<real> &x) const
       x = apply_neumann_bc( x , info_ );
     }
   }
+
 
 void CahnHilliard2DRHS::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir) const
 {
