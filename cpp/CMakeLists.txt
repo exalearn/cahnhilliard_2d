@@ -91,39 +91,3 @@ add_custom_target( mvcmd_py ALL
   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/src/python/driver.py" "${CMAKE_SOURCE_DIR}/python/driver.py"
   DEPENDS "${CMAKE_SOURCE_DIR}/src/python/driver.py"
 )
-
-##############################################
-## Swig/Python build
-##############################################
-#
-#FIND_PACKAGE( SWIG REQUIRED )
-#INCLUDE( ${SWIG_USE_FILE} )
-#
-#FIND_PACKAGE( PythonLibs )
-#INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_PATH} )
-#INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
-#INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/src )
-#	    
-#SET( CMAKE_SWIG_FLAGS "-threads" )
-#SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fPIC")
-#
-#SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES CPLUSPLUS ON )
-#SET_SOURCE_FILES_PROPERTIES( src/cahnhilliard.i PROPERTIES SWIG_FLAGS "-threads" )
-#
-##SWIG_ADD_LIBRARY( cahnhilliard TYPE SHARED LANGUAGE python SOURCES src/cahnhilliard.i )
-#SWIG_ADD_MODULE( cahnhilliard python src/cahnhilliard.i src/chparams.cpp src/utils_ch.cpp )
-#
-#SWIG_LINK_LIBRARIES( cahnhilliard
-#                     ${PYTHON_LIBRARIES}
-#		     ch_src
-#)
-#		   
-## Copy the shared objects and Swig wrappers to cpp/swig/
-#add_custom_target( mvcmd_so ALL
-#  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so" "${CMAKE_SOURCE_DIR}/swig/_cahnhilliard.so"
-#  DEPENDS "${CMAKE_SOURCE_DIR}/build/_cahnhilliard.so"
-#)
-#add_custom_target( mvcmd_py ALL
-#  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py" "${CMAKE_SOURCE_DIR}/swig/cahnhilliard.py"
-#  DEPENDS "${CMAKE_SOURCE_DIR}/build/cahnhilliard.py"
-#)
