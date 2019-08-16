@@ -11,13 +11,13 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
   // Instantiate rhs
   CahnHilliard2DRHS rhs = CahnHilliard2DRHS( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -30,15 +30,15 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
   
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -46,12 +46,12 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
   
 };
 
@@ -62,13 +62,13 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   // Instantiate rhs
   CahnHilliard2DRHS_thermal_nodiffusion rhs = CahnHilliard2DRHS_thermal_nodiffusion( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -81,18 +81,18 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
 
   timer t_solver("run_solver");
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     t_solver.start();
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
     t_solver.stop();
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
@@ -101,12 +101,12 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
   
   t_solver.print();
   rhs.printTimers();
@@ -120,13 +120,13 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
   // Instantiate rhs
   CahnHilliard2DRHS_thermal rhs = CahnHilliard2DRHS_thermal( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -139,15 +139,15 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.) );
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.) );
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -155,12 +155,12 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
   
 };
 
@@ -171,13 +171,13 @@ void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
   // Instantiate rhs
   CahnHilliard2DRHS rhs = CahnHilliard2DRHS( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -190,15 +190,15 @@ void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -206,12 +206,12 @@ void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
 
 };
 
@@ -222,13 +222,13 @@ void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& inf
   // Instantiate rhs
   CahnHilliard2DRHS_thermal_nodiffusion rhs = CahnHilliard2DRHS_thermal_nodiffusion( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -241,15 +241,15 @@ void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& inf
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -257,12 +257,12 @@ void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& inf
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
 
 };
 
@@ -273,13 +273,13 @@ void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& i
   // Instantiate rhs
   CahnHilliard2DRHS_thermal rhs = CahnHilliard2DRHS_thermal( chparams , info );
   
-  aligned_vector<real> x;
+  //aligned_vector<real> x;
   if (info.t0 == 0) {
-    rhs.setInitialConditions(x);
+    rhs.setInitialConditions(info.x);
     int iter = 0;
   }
   else {
-    x        = info.x;
+    //x        = info.x;
     int iter = info.iter;
   }
   
@@ -292,15 +292,15 @@ void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& i
   controlled_stepper_type controlled_stepper;
 
   const real stability_limit = chparams.compute_stability_limit(info.dx , info.dy); // just an estimate
-  const real res0            = rhs.l2residual(x);
+  const real res0            = rhs.l2residual(info.x);
 
   std::cout << "residual at initial condition: " << res0 << std::endl;
   if (info.iter == 0)
-    rhs.write_state(x,0,info.nx,info.ny,info.outdir);
+    rhs.write_state(info.x,0,info.nx,info.ny,info.outdir);
 
   if (chparams.sigma_noise < 1e-2) {
     std::cout << "Solving deterministic (noise-free) CH" << std::endl;
-    integrate_adaptive(controlled_stepper, rhs, x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
+    integrate_adaptive(controlled_stepper, rhs, info.x, info.t0, info.tf, static_cast<real>(stability_limit/2.));
     //boost::numeric::odeint::integrate_const(controlled_stepper, rhs, x, info.t0, info.tf, stability_limit/2.);
   }
   else {
@@ -308,12 +308,12 @@ void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& i
     boost::mt19937 rng;
     boost::numeric::odeint::integrate_const( stochastic_euler() ,
 		     std::make_pair( rhs , ornstein_stoch( rng , chparams.sigma_noise ) ),
-		     x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
+		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t = " << info.tf << ", relative residual: " << rhs.l2residual(x) / res0 << std::endl;
-  rhs.write_state(x,info.iter,info.nx,info.ny,info.outdir);
-  info.x = x;
+  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  //info.x = x;
 
 };
 
