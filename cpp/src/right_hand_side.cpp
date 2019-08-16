@@ -1,6 +1,6 @@
 #include "right_hand_side.h"
 
-#include <cmath>
+#include <math.h>
 
 real RightHandSide::l2residual(const aligned_vector<real> &c) {
   aligned_vector<real> dcdt;

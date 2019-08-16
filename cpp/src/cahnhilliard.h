@@ -16,12 +16,12 @@ class CahnHilliard2DRHS : public RightHandSide {
   CahnHilliard2DRHS(CHparamsVector& chp , SimInfo& info);
   ~CahnHilliard2DRHS();
   void rhs(const aligned_vector<real> &c, aligned_vector<real> &dcdt, const real t) override;
-  void write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir) override;
-  void setInitialConditions(aligned_vector<real> &x);
+  void write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir) const override;
+  void setInitialConditions(aligned_vector<real> &x) const;
   
  private:
 
-  CHparamsVector chpV_;
+  CHparamsVector& chpV_;
   SimInfo& info_;
   void (*ch_rhs_) (const aligned_vector<real>&, aligned_vector<real>&, real, CHparamsVector&, SimInfo&);
 

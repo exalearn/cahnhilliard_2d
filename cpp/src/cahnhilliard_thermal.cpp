@@ -25,7 +25,7 @@
   */
 
 CahnHilliard2DRHS_thermal::CahnHilliard2DRHS_thermal(CHparamsScalar& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , info_(info)
+  : noise_dist_(0.0,1.0), chpV_(*(new CHparamsVector())), info_(info)
   {    
     chpV_.eps_2    = aligned_vector<real>( info_.nx*info_.ny , chp.eps_2     );
     chpV_.b        = aligned_vector<real>( info_.nx*info_.ny , chp.b         );
@@ -133,7 +133,7 @@ void CahnHilliard2DRHS_thermal::rhs(const aligned_vector<real> &ct, aligned_vect
   }
 
 
-void CahnHilliard2DRHS_thermal::setInitialConditions(aligned_vector<real> &x)
+void CahnHilliard2DRHS_thermal::setInitialConditions(aligned_vector<real> &x) const
   {
     x.resize(2 * info_.nx * info_.ny);
 
@@ -158,7 +158,7 @@ void CahnHilliard2DRHS_thermal::setInitialConditions(aligned_vector<real> &x)
   }
 
 
-void CahnHilliard2DRHS_thermal::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir)
+void CahnHilliard2DRHS_thermal::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir) const
 {
   if ( outdir.back() != '/' )
     outdir += '/';

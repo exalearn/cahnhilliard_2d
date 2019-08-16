@@ -422,7 +422,7 @@ void compute_eps2_and_sigma_from_polymer_params( CHparamsVector& chpV,
           
           if( (j < info.ny) && (i < info.nx) ){
       
-            const int idx_ij        = info.idx2du(i, j);
+            const int idx_ij      = info.idx2du(i, j);
             const real X          = convert_temperature_to_flory_huggins( chpV , info , T_data[idx_ij] );
             const real m_scaled   = 0.5 * ( 1.0 - m_data[idx_ij] );
             const real eps_2      = chpV.L_kuhn * chpV.L_kuhn / ( 3.0 * m_scaled * (1.0 - m_scaled) * X * chpV.L_omega * chpV.L_omega );

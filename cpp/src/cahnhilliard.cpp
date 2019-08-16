@@ -22,7 +22,7 @@
   */
 
 CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsScalar& chp , SimInfo& info)
-  : noise_dist_(0.0,1.0) , info_(info)
+  : noise_dist_(0.0,1.0), chpV_(*(new CHparamsVector())), info_(info)
   {    
     chpV_.eps_2    = aligned_vector<real>( info_.nx*info_.ny , chp.eps_2     );
     chpV_.b        = aligned_vector<real>( info_.nx*info_.ny , chp.b         );
@@ -83,18 +83,16 @@ CahnHilliard2DRHS::~CahnHilliard2DRHS() { };
 
 void CahnHilliard2DRHS::rhs(const aligned_vector<real> &c, aligned_vector<real> &dcdt, const real t)
   {
-    LIKWID_MARKER_START("CahnHilliard2DRHS::rhs");
     dcdt.resize(info_.nx * info_.ny);
     (*ch_rhs_)(c, dcdt, t, chpV_, info_);
-    LIKWID_MARKER_STOP("CahnHilliard2DRHS::rhs");
   }
 
 
-void CahnHilliard2DRHS::setInitialConditions(aligned_vector<real> &x)
-  {
-    LIKWID_MARKER_START("CahnHilliard2DRHS::setInitialConditions");
+void CahnHilliard2DRHS::setInitialConditions(aligned_vector<real> &x) const
+  { 
+    //resize if necessary
     x.resize(info_.nx * info_.ny);
-
+    
     std::default_random_engine generator;
     std::uniform_real_distribution<real> distribution(-1.0,1.0);
 
@@ -117,10 +115,9 @@ void CahnHilliard2DRHS::setInitialConditions(aligned_vector<real> &x)
     else if ( info_.bc.compare("neumann") == 0 ) {
       x = apply_neumann_bc( x , info_ );
     }
-    LIKWID_MARKER_STOP("CahnHilliard2DRHS::setInitialConditions");
   }
 
-void CahnHilliard2DRHS::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir)
+void CahnHilliard2DRHS::write_state(const aligned_vector<real> &x , const int idx , const int nx , const int ny , std::string& outdir) const
 {
   if ( outdir.back() != '/' )
     outdir += '/';
