@@ -33,23 +33,28 @@ CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsScalar& chp , SimInfo& info)
 
     if ( info.bc.compare("dirichlet") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_stationary_boundaries;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, dirichlet BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, dirichlet BCs, no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("neumann") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_neumannBC;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, neumann BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, neumann BCs, no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("mixed_neumann_bottom_dirichlet") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_mixedBC_neumann_with_bottom_dirichlet;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + bottom dirichlet), no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + bottom dirichlet), no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("mixed_neumann_top_dirichlet") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + top dirichlet), no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + top dirichlet), no thermal dependence" << std::endl;
     }
     else {
       ch_rhs_ = &compute_ch_nonlocal;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, periodic BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, periodic BCs, no thermal dependence" << std::endl;
     }
     
   }
@@ -60,23 +65,28 @@ CahnHilliard2DRHS::CahnHilliard2DRHS(CHparamsVector& chp , SimInfo& info)
   {
     if ( info.bc.compare("dirichlet") == 0) {
       ch_rhs_ = &compute_ch_nonlocal_stationary_boundaries;
-      std::cout << "Initialized Cahn-Hilliard equation with spatial-field parameters, dirichlet BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation with spatial-field parameters, dirichlet BCs, no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("neumann") == 0) {
       ch_rhs_ = &compute_ch_nonlocal_neumannBC;
-      std::cout << "Initialized Cahn-Hilliard equation with spatial-field parameters, neumann BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation with spatial-field parameters, neumann BCs, no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("mixed_neumann_bottom_dirichlet") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_mixedBC_neumann_with_bottom_dirichlet;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + bottom dirichlet), no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + bottom dirichlet), no thermal dependence" << std::endl;
     }
     else if ( info.bc.compare("mixed_neumann_top_dirichlet") == 0 ) {
       ch_rhs_ = &compute_ch_nonlocal_mixedBC_neumann_with_top_dirichlet;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + top dirichlet), no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, mixed BC (neumann + top dirichlet), no thermal dependence" << std::endl;
     }
     else {
       ch_rhs_ = &compute_ch_nonlocal;
-      std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, periodic BCs, no thermal dependence" << std::endl;
+      if(info.verbosity>=1)
+        std::cout << "Initialized Cahn-Hilliard equation: scalar parameters, periodic BCs, no thermal dependence" << std::endl;
     }
   }
 
