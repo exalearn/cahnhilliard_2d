@@ -5,7 +5,7 @@
 #include "cahnhilliard_thermal_nodiffusion.h"
 #include "run_ch_solver.h"
 
-void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
+real run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -13,15 +13,18 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -55,14 +58,19 @@ void run_ch_solver_non_thermal( CHparamsVector& chparams , SimInfo& info )
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " <<  res1 / res0 << std::endl;
   rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
   //info.x = x;
-  
+  return res1;
 };
 
 
-void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& info )
+real run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -70,15 +78,18 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -112,13 +123,19 @@ void run_ch_solver_thermal_no_diffusion( CHparamsVector& chparams , SimInfo& inf
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << res1 / res0 << std::endl;
   rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
   //info.x = x;
+  return res1;
 };
 
 
-void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& info )
+real run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -126,15 +143,18 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -168,14 +188,20 @@ void run_ch_solver_thermal_with_diffusion( CHparamsVector& chparams , SimInfo& i
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
-  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
-  //info.x = x;
   
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << res1 / res0 << std::endl;
+  rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
+  
+  //info.x = x;
+  return res1;
 };
 
 
-void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
+real run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -183,15 +209,18 @@ void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -225,14 +254,21 @@ void run_ch_solver_non_thermal( CHparamsScalar& chparams , SimInfo& info )
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << res1 / res0 << std::endl;
   rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
   //info.x = x;
-
+  
+  //residual after solve
+  return res1;
 };
 
 
-void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& info )
+real run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -240,15 +276,18 @@ void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& inf
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -282,14 +321,19 @@ void run_ch_solver_thermal_no_diffusion( CHparamsScalar& chparams , SimInfo& inf
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << res1 / res0 << std::endl;
   rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
   //info.x = x;
-
+  return res1;
 };
 
 
-void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& info )
+real run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& info )
 {
 
   // Instantiate rhs
@@ -297,15 +341,18 @@ void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& i
   
   //aligned_vector<real> x;
   if (info.t0 == 0) {
-    std::cout << "applying initial conditions: " << info.bc << std::endl;
+    if(info.verbosity>=2)
+      std::cout << "applying initial conditions: " << info.bc << std::endl;
     rhs.setInitialConditions(info.x);
     int iter = 0;
     
     if (chparams.sigma_noise < 1e-2){
-      std::cout << "Solving deterministic (noise-free) CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving deterministic (noise-free) CH" << std::endl;
     }
     else{
-      std::cout << "Solving stochastic CH" << std::endl;
+      if(info.verbosity>=2)
+        std::cout << "Solving stochastic CH" << std::endl;
     }
   }
   else {
@@ -339,38 +386,44 @@ void run_ch_solver_thermal_with_diffusion( CHparamsScalar& chparams , SimInfo& i
 		     info.x , info.t0 , info.tf , static_cast<real>(stability_limit/40.) );
   }
   info.iter += 1;
-  std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << rhs.l2residual(info.x) / res0 << std::endl;
+  
+  //residual after solve
+  const real res1 =  rhs.l2residual(info.x);
+  
+  if(info.verbosity>=1)
+    std::cout << "iter: " << info.iter << " , t0 = " << info.t0 << " , tf = " << info.tf << ", relative residual: " << res1 / res0 << std::endl;
   rhs.write_state(info.x,info.iter,info.nx,info.ny,info.outdir);
   //info.x = x;
-
+  
+  return res1;
 };
 
-void run_ch_solver( CHparamsVector& chparams , SimInfo& info )
+real run_ch_solver( CHparamsVector& chparams , SimInfo& info )
 {
   
   if      (info.rhs_type.compare("ch_non_thermal") == 0) {
-    run_ch_solver_non_thermal( chparams , info );
+    return run_ch_solver_non_thermal( chparams , info );
   }
   else if (info.rhs_type.compare("ch_thermal_no_diffusion") == 0) {
-    run_ch_solver_thermal_no_diffusion( chparams , info );
+    return run_ch_solver_thermal_no_diffusion( chparams , info );
   }
   else if (info.rhs_type.compare("ch_thermal_with_diffusion") == 0) {
-    run_ch_solver_thermal_with_diffusion( chparams , info );
+    return run_ch_solver_thermal_with_diffusion( chparams , info );
   }
 
 };
 
-void run_ch_solver( CHparamsScalar& chparams , SimInfo& info )
+real run_ch_solver( CHparamsScalar& chparams , SimInfo& info )
 {
   
   if      (info.rhs_type.compare("ch_non_thermal") == 0) {
-    run_ch_solver_non_thermal( chparams , info );
+    return run_ch_solver_non_thermal( chparams , info );
   }
   else if (info.rhs_type.compare("ch_thermal_no_diffusion") == 0) {
-    run_ch_solver_thermal_no_diffusion( chparams , info );
+    return run_ch_solver_thermal_no_diffusion( chparams , info );
   }
   else if (info.rhs_type.compare("ch_thermal_with_diffusion") == 0) {
-    run_ch_solver_thermal_with_diffusion( chparams , info );
+    return run_ch_solver_thermal_with_diffusion( chparams , info );
   }
 
 };

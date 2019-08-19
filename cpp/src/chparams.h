@@ -38,6 +38,7 @@ class SimInfo
   std::string rhs_type = "ch_non_thermal"; // RHS type: "ch_non_thermal", "ch_thermal_no_diffusion", "ch_thermal_with_diffusion"
   real BC_dirichlet_ch;       // Used to specify BC value for dirichlet BC
   std::string outdir = "./";    // Filepath to the output directory
+  int verbosity = 0;
 
   //safe version (used for indices with offsets):
   inline int idx2d(int i, int j){

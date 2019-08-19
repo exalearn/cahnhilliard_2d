@@ -13,16 +13,16 @@ PYBIND11_MODULE(cahnhilliard, m) {
             std::cout,                               // std::ostream&
             py::module::import("sys").attr("stdout") // Python output
         );
-        run_ch_solver(chparamv, info);
-  }, py::arg("chparamv"), py::arg("info"));
+        return run_ch_solver(chparamv, info);
+  }, py::arg("chparamv"), py::arg("info"), py::return_value_policy::copy);
   
   m.def("run_ch_solver", [](CHparamsScalar& chparams, SimInfo& info){
     py::scoped_ostream_redirect stream(
             std::cout,                               // std::ostream&
             py::module::import("sys").attr("stdout") // Python output
         );
-        run_ch_solver(chparams, info);
-  }, py::arg("chparams"), py::arg("info"));
+        return run_ch_solver(chparams, info);
+  }, py::arg("chparams"), py::arg("info"), py::return_value_policy::copy);
   //m.def("run_ch_solver", (void (*)(CHparamsScalar&, SimInfo&)) &run_ch_solver, py::arg("chparams"), py::arg("info"));
   
   //siminfo
@@ -46,6 +46,9 @@ PYBIND11_MODULE(cahnhilliard, m) {
   
   sim_info.def_property("iter", [](const SimInfo& si) { return si.iter; }, 
                                 [](SimInfo& si, const int& val) -> void { si.iter = val; });
+                                
+  sim_info.def_property("verbosity", [](const SimInfo& si) { return si.verbosity; }, 
+                                     [](SimInfo& si, const int& val) -> void { si.verbosity = val; });
                                
   sim_info.def_property("dx", [](const SimInfo& si) { return si.dx; }, 
                               [](SimInfo& si, const real& val) -> void { si.dx = val; });
