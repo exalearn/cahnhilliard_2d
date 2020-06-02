@@ -1,0 +1,26 @@
+sudo: required
+
+dist: bionic
+
+language: python
+python:
+  - "3.7"
+
+# Handle git submodules
+git:
+    submodules: true
+
+before_install:
+  - sudo apt-get install -y cmake libboost-all-dev
+  - sudo apt-get install -y libopenmpi-dev openmpi-bin
+  - pwd
+  - cd /home/travis/build/exalearn/cahnhilliard_2d; git checkout docker-devel
+  - mkdir /home/travis/build/exalearn/cahnhilliard_2d/cpp/build
+  - cd /home/travis/build/exalearn/cahnhilliard_2d/cpp/build; cmake ..; make
+  - cd /home/travis/build/exalearn/cahnhilliard_2d/cpp/python
+
+install:
+  - pip install -e .
+
+script:
+  - python driver.py
